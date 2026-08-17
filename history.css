@@ -1,0 +1,615 @@
+/* Several elements below use `hidden` alongside a class that sets its own
+   `display` (flex, etc.) — without this, that class's display declaration
+   beats the browser's default `[hidden] { display: none }` rule and the
+   element stays visible despite being "hidden". */
+[hidden] {
+  display: none !important;
+}
+
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --gridline: #e1e0d9;
+  --border: rgba(11, 11, 11, 0.10);
+  --accent: #2962ff;
+  --accent-soft: rgba(41, 98, 255, 0.10);
+  --danger: #d03b3b;
+  --good: #1baf7a;
+  --streak: #eb6834;
+  --row-hover: #f2f2f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --gridline: #2c2c2a;
+    --border: rgba(255, 255, 255, 0.10);
+    --accent: #3987e5;
+    --accent-soft: rgba(57, 135, 229, 0.16);
+    --danger: #e66767;
+    --good: #199e70;
+    --streak: #d95926;
+    --row-hover: #232322;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+}
+
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+
+header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+}
+
+.stat-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.stat-line .streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--streak);
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+/* Segmented controls */
+
+.segmented {
+  display: inline-flex;
+  background: var(--surface);
+  border: 1px solid var(--gridline);
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 20px;
+  gap: 2px;
+}
+
+.segmented.small {
+  padding: 2px;
+  border-radius: 8px;
+  margin-bottom: 0;
+}
+
+.segment-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.segment-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* Quiet non-numeric hint that something's ready to review — deliberately
+   not a count, so it doesn't read as a backlog. */
+.ready-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--streak);
+  margin-left: 2px;
+}
+
+.segment-btn.active .ready-dot {
+  background: white;
+}
+
+.subseg-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 6px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.subseg-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
+
+/* Words toolbar */
+
+.words-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 140px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  display: flex;
+  pointer-events: none;
+}
+
+#search {
+  width: 100%;
+  padding: 8px 10px 8px 30px;
+  border-radius: 8px;
+  border: 1px solid var(--gridline);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+#sortBy {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--gridline);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--gridline);
+  background: var(--surface);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: var(--row-hover);
+}
+
+.menu-wrap {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--gridline);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  padding: 6px;
+  min-width: 200px;
+  z-index: 20;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.menu-item:hover {
+  background: var(--row-hover);
+}
+
+.menu-item.danger {
+  color: var(--danger);
+}
+
+.empty-state {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.empty-state .muted {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.list-view {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--gridline);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.list-view th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--gridline);
+}
+
+.list-view td {
+  padding: 10px 14px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--gridline);
+  color: var(--text-primary);
+}
+
+.list-view tr:last-child td {
+  border-bottom: none;
+}
+
+.list-view tr:hover td {
+  background: var(--row-hover);
+}
+
+.list-view td.finnish {
+  font-weight: 600;
+}
+
+.list-view td.count,
+.list-view td.lastseen {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 6px;
+}
+
+.delete-btn:hover {
+  color: var(--danger);
+  background: var(--row-hover);
+}
+
+.cloud-view {
+  background: var(--surface);
+  border: 1px solid var(--gridline);
+  border-radius: 10px;
+  padding: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px 18px;
+  min-height: 200px;
+}
+
+.cloud-word {
+  cursor: default;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+/* Known words — collapsed by default so the words still being learned stay
+   the focus; this is a quiet archive, not another list to work through. */
+.mastered-details {
+  margin-top: 16px;
+  background: var(--surface);
+  border: 1px solid var(--gridline);
+  border-radius: 10px;
+  padding: 4px 4px;
+}
+
+.mastered-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: 8px;
+}
+
+.mastered-summary::-webkit-details-marker {
+  display: none;
+}
+
+.mastered-summary:hover {
+  background: var(--row-hover);
+}
+
+.mastered-summary svg {
+  color: var(--good);
+}
+
+.mastered-list {
+  padding: 4px 4px 6px;
+}
+
+.mastered-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.mastered-row:hover {
+  background: var(--row-hover);
+}
+
+.mastered-word-text {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mastered-finnish {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mastered-english {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.mastered-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.mastered-actions .icon-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+}
+
+.mastered-actions .icon-btn:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* Quiz / Practice */
+
+.quiz-view {
+  background: var(--surface);
+  border: 1px solid var(--gridline);
+  border-radius: 10px;
+  padding: 40px 24px;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.due-text {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin: 0 0 16px;
+}
+
+.quiz-intro-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.primary-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary-btn:hover {
+  filter: brightness(1.1);
+}
+
+.ghost-btn {
+  border: 1px solid var(--gridline);
+  background: var(--surface);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ghost-btn:hover {
+  background: var(--row-hover);
+}
+
+.quiz-card {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.quiz-progress {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0 0 16px;
+}
+
+.flash-card {
+  width: 100%;
+  border: 1px solid var(--gridline);
+  border-radius: 12px;
+  padding: 28px 24px;
+  margin-bottom: 20px;
+  background: var(--page);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.flash-card.card-exit {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+}
+
+.flash-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.flash-word-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.flash-finnish {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.speak-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--accent);
+  color: white;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.flash-answer-block {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--gridline);
+}
+
+.flash-english {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.quiz-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.grade-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: white;
+}
+
+.grade-btn.wrong {
+  background: var(--danger);
+}
+
+.grade-btn.right {
+  background: var(--good);
+}
+
+.grade-btn:hover {
+  filter: brightness(1.1);
+}
+
+.quiz-done p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin: 0 0 16px;
+}

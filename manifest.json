@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Sanoja - Read Words in Finnish",
+  "version": "2.1.3",
+  "description": "Select or double-click any word to translate it between English and Finnish, hear it pronounced, and review saved words later with spaced-repetition quizzes.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://translate.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["icons.js", "content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

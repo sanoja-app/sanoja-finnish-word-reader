@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Sanoja — Your words</title>
+  <link rel="stylesheet" href="history.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Sanoja</h1>
+      <p id="statLine" class="stat-line">0 words</p>
+    </header>
+
+    <div class="segmented" id="topSegmented">
+      <button class="segment-btn" data-segment="practice" id="segPractice"></button>
+      <button class="segment-btn" data-segment="words" id="segWords"></button>
+    </div>
+
+    <!-- Practice -->
+    <section id="practiceSection" class="section">
+      <div class="quiz-view">
+        <div id="quizIntro" class="quiz-intro">
+          <p id="dueText" class="due-text">Checking your words…</p>
+          <div class="quiz-intro-actions">
+            <button id="startDueBtn" class="primary-btn"></button>
+            <button id="startAllBtn" class="ghost-btn">Practice all words</button>
+          </div>
+        </div>
+
+        <div id="quizCard" class="quiz-card" hidden>
+          <p id="quizProgress" class="quiz-progress"></p>
+          <div class="flash-card" id="flashCard">
+            <div class="flash-label">Finnish</div>
+            <div class="flash-word-row">
+              <div id="quizFinnish" class="flash-finnish"></div>
+              <button id="quizSpeakBtn" class="speak-btn" aria-label="Hear pronunciation"></button>
+            </div>
+            <div id="quizAnswerBlock" class="flash-answer-block" hidden>
+              <div class="flash-label">English</div>
+              <div id="quizEnglish" class="flash-english"></div>
+            </div>
+          </div>
+
+          <div id="quizRevealRow" class="quiz-actions">
+            <button id="showAnswerBtn" class="primary-btn">Show answer</button>
+          </div>
+          <div id="quizGradeRow" class="quiz-actions" hidden>
+            <button id="gradeWrongBtn" class="grade-btn wrong"></button>
+            <button id="gradeRightBtn" class="grade-btn right"></button>
+          </div>
+        </div>
+
+        <div id="quizDone" class="quiz-done" hidden>
+          <p id="quizDoneText"></p>
+          <button id="quizAgainBtn" class="ghost-btn">Back</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Words -->
+    <section id="wordsSection" class="section">
+      <div class="words-toolbar">
+        <div class="search-wrap">
+          <span id="searchIcon" class="search-icon"></span>
+          <input id="search" type="search" placeholder="Search…" />
+        </div>
+
+        <select id="sortBy">
+          <option value="lastSeen">Recently seen</option>
+          <option value="count">Most frequent</option>
+          <option value="az">A → Z</option>
+        </select>
+
+        <div class="segmented small" id="subSegmented">
+          <button class="subseg-btn active" data-subview="list" id="subList" aria-label="List view"></button>
+          <button class="subseg-btn" data-subview="cloud" id="subCloud" aria-label="Word cloud view"></button>
+        </div>
+
+        <div class="menu-wrap">
+          <button id="moreBtn" class="icon-btn" aria-label="More actions"></button>
+          <div id="moreMenu" class="dropdown-menu" hidden>
+            <button id="exportBtn" class="menu-item"></button>
+            <button id="cleanupBtn" class="menu-item" hidden></button>
+            <button id="clearBtn" class="menu-item danger"></button>
+          </div>
+        </div>
+      </div>
+
+      <div id="emptyState" class="empty-state" hidden>
+        <p>No words saved yet.</p>
+        <p class="muted">Select or double-click words on any page with the extension on, and they'll show up here.</p>
+      </div>
+
+      <table id="listView" class="list-view">
+        <thead>
+          <tr>
+            <th>Finnish</th>
+            <th>English</th>
+            <th>Seen</th>
+            <th>Last seen</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="listBody"></tbody>
+      </table>
+
+      <div id="cloudView" class="cloud-view" hidden></div>
+
+      <details id="masteredDetails" class="mastered-details" hidden>
+        <summary id="masteredSummary" class="mastered-summary"></summary>
+        <div id="masteredList" class="mastered-list"></div>
+      </details>
+    </section>
+  </div>
+
+  <script src="icons.js"></script>
+  <script src="history.js"></script>
+</body>
+</html>
