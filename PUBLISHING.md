@@ -25,9 +25,12 @@ git push
 ```
 
 Your privacy policy is live at:
-`https://github.com/sanoja-app/sanoja-finnish-word-reader/blob/main/PRIVACY.md`
-— GitHub renders it as a normal readable page. This is the URL used for
-the Chrome Web Store submission below.
+`https://sanoja-app.github.io/sanoja-finnish-word-reader/privacy.html`
+— a page on Sanoja's own website (styled to match, not just a raw GitHub
+markdown file). This is the URL to use for the Chrome Web Store
+submission below. (`PRIVACY.md` in the repo root is the source text that
+page is built from — GitHub also renders that on its own as a fallback,
+at `https://github.com/sanoja-app/sanoja-finnish-word-reader/blob/main/PRIVACY.md`.)
 
 ## 2. Publish to the Chrome Web Store
 

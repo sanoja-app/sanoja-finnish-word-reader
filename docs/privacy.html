@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Privacy Policy — Sanoja</title>
+<meta name="description" content="Sanoja's privacy policy: what data the extension touches, what it does not do, and why." />
+<link rel="icon" href="assets/icon128.png" />
+<style>
+  :root {
+    color-scheme: light;
+    --page: #ffffff;
+    --surface-alt: #f7f8fa;
+    --text-primary: #0b0e14;
+    --text-secondary: #57606f;
+    --text-muted: #8a92a3;
+    --gridline: #e7e9ee;
+    --accent: #2962ff;
+    --accent-dark: #1a3fd6;
+    --accent-soft: #e8edff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  a { color: var(--accent); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  header.nav { padding: 20px 0; border-bottom: 1px solid var(--gridline); }
+  header.nav .wrap { display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; text-decoration: none; color: var(--text-primary); }
+  .brand img { width: 28px; height: 28px; border-radius: 50%; }
+  .nav-links { display: flex; align-items: center; gap: 28px; font-size: 14px; font-weight: 600; }
+  .nav-links a { color: var(--text-secondary); text-decoration: none; }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-cta { background: var(--accent); color: white !important; padding: 9px 18px; border-radius: 999px; font-weight: 700; }
+  .nav-cta:hover { background: var(--accent-dark); }
+
+  .doc-hero { padding: 64px 0 8px; text-align: center; }
+  .doc-hero h1 { font-size: 36px; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .doc-hero p.updated { color: var(--text-muted); font-size: 14px; margin: 0; }
+
+  .doc { max-width: 760px; margin: 0 auto; padding: 40px 24px 100px; }
+  .doc h2 { font-size: 21px; margin: 40px 0 14px; }
+  .doc h2:first-child { margin-top: 0; }
+  .doc p { color: var(--text-secondary); font-size: 15.5px; margin: 0 0 14px; }
+  .doc ul { color: var(--text-secondary); font-size: 15.5px; padding-left: 22px; margin: 0 0 14px; }
+  .doc li { margin-bottom: 8px; }
+  .doc li:last-child { margin-bottom: 0; }
+  .doc code {
+    background: var(--surface-alt);
+    border: 1px solid var(--gridline);
+    border-radius: 5px;
+    padding: 2px 6px;
+    font-size: 13.5px;
+  }
+  .card {
+    background: var(--surface-alt);
+    border: 1px solid var(--gridline);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-top: 40px;
+  }
+  .card h2 { margin-top: 0; }
+
+  footer { padding: 40px 0 56px; border-top: 1px solid var(--gridline); }
+  footer .wrap {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px; font-size: 13.5px; color: var(--text-muted);
+  }
+  footer a { color: var(--text-secondary); text-decoration: none; margin-left: 18px; }
+  footer a:hover { color: var(--accent); }
+
+  @media (max-width: 760px) {
+    .doc-hero h1 { font-size: 28px; }
+    .nav-links { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html"><img src="assets/icon128.png" alt="" />Sanoja</a>
+      <nav class="nav-links">
+        <a href="index.html#features">Features</a>
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader">Source</a>
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader#how-to-install-unpacked-for-testing" class="nav-cta">Install Sanoja</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="doc-hero">
+    <div class="wrap">
+      <h1>Privacy Policy</h1>
+      <p class="updated">Last updated: August 2026</p>
+    </div>
+  </section>
+
+  <article class="doc">
+    <p>
+      Sanoja is a small personal project for learning Finnish vocabulary
+      while browsing. This page explains exactly what it does and does not
+      do with your data.
+    </p>
+
+    <h2>What Sanoja does</h2>
+    <ul>
+      <li>When you select or double-click a word or short phrase on a
+        webpage, that text is sent to Google's public translation service
+        (<code>translate.googleapis.com</code>) to get a translation. This
+        is the only network request Sanoja makes, and it only happens when
+        you actively select text — Sanoja never reads or transmits a
+        page's content on its own.</li>
+      <li>Words you look up, along with your review schedule, quiz history,
+        and streak, are saved using Chrome's local extension storage
+        (<code>chrome.storage.local</code>) on your own computer. This data
+        is never uploaded to any server Sanoja controls — there isn't
+        one.</li>
+      <li>Your two toggle settings (enabled / speak automatically) are
+        saved using <code>chrome.storage.sync</code>, which is Chrome's own
+        built-in settings sync (the same mechanism used by e.g. your
+        bookmarks, if you have Chrome sync turned on). This is handled
+        entirely by Google's Chrome sync infrastructure, not by Sanoja.</li>
+    </ul>
+
+    <h2>What Sanoja does not do</h2>
+    <ul>
+      <li>No analytics, tracking, or telemetry of any kind.</li>
+      <li>No accounts, sign-in, or user identifiers.</li>
+      <li>No advertising.</li>
+      <li>No data is sold, shared, or used for anything beyond showing you
+        a translation and saving your word list locally.</li>
+      <li>No data collection beyond the word/phrase you explicitly select
+        for translation.</li>
+    </ul>
+
+    <h2>Third-party services</h2>
+    <p>
+      The only third party involved is Google's translation endpoint, used
+      solely to translate the text you select. Its use is subject to
+      <a href="https://policies.google.com/privacy">Google's own privacy
+      policy</a>. Sanoja has no relationship with Google beyond calling
+      this public endpoint.
+    </p>
+
+    <h2>Permissions</h2>
+    <ul>
+      <li><strong>storage</strong> — to save your word list and settings
+        locally, as described above.</li>
+      <li><strong>Access to <code>translate.googleapis.com</code></strong>
+        — to perform translations.</li>
+      <li><strong>Content script on all pages</strong> — to detect when
+        you select or double-click a word so a translation popup can
+        appear. It only acts on text you've explicitly selected.</li>
+    </ul>
+
+    <div class="card">
+      <h2>Contact</h2>
+      <p style="margin:0">
+        This is an independent personal project, not affiliated with
+        Google or Yle. For questions, open an issue on the
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader/issues">GitHub repository</a>
+        this policy is published alongside.
+      </p>
+    </div>
+  </article>
+
+  <footer>
+    <div class="wrap">
+      <span>Sanoja is an independent open-source project, MIT licensed.</span>
+      <div>
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader">GitHub</a>
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader/issues">Support</a>
+        <a href="index.html">Home</a>
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader/blob/main/LICENSE">License</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

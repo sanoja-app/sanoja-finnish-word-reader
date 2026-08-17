@@ -7,11 +7,19 @@ Click the speaker icon to hear the Finnish word spoken aloud.
 
 ## How to install (unpacked, for testing)
 
-1. Unzip this folder somewhere permanent (don't delete it after installing —
-   Chrome loads the extension directly from these files).
+1. Get the code onto your computer, permanently — Chrome loads the extension
+   directly from these files, so don't delete the folder after installing:
+   - **From GitHub**: click the green **Code** button on the
+     [repo page](https://github.com/sanoja-app/sanoja-finnish-word-reader) →
+     **Download ZIP** → unzip it. You'll get a folder like
+     `sanoja-finnish-word-reader-main`.
+   - **Or clone it**: `git clone https://github.com/sanoja-app/sanoja-finnish-word-reader.git`
 2. Open `chrome://extensions` in Chrome.
 3. Turn on **Developer mode** (top-right toggle).
-4. Click **Load unpacked** and select this folder.
+4. Click **Load unpacked** and select that folder — the same one that has
+   `manifest.json`, `background.js`, `content.js`, etc. directly inside it
+   (not the `docs` or `store-assets` subfolders — those are the website and
+   screenshots, not the extension itself).
 5. Pin the extension (puzzle-piece icon in the toolbar → pin "Sanoja") so you
    can quickly open its popup to toggle it on/off or turn on auto-speak.
 
