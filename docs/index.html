@@ -163,30 +163,91 @@
   .feature-card h3 { font-size: 16px; margin: 0 0 8px; }
   .feature-card p { font-size: 14px; color: var(--text-secondary); margin: 0; }
 
-  /* Showcase */
+  /* Showcase carousel */
   section.showcase { padding: 80px 0; }
-  section.showcase .head { text-align: center; margin-bottom: 44px; }
+  section.showcase .head { text-align: center; margin-bottom: 48px; }
   section.showcase h2 { font-size: 30px; margin: 0 0 10px; }
   section.showcase p.sub { color: var(--text-secondary); max-width: 520px; margin: 0 auto; font-size: 16px; }
-  .showcase-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 22px;
+
+  .carousel-viewport {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    border-radius: 20px;
   }
-  .showcase-grid figure { margin: 0; }
-  .showcase-grid img {
-    width: 100%;
-    border-radius: 14px;
+  .carousel-viewport::-webkit-scrollbar { display: none; }
+  .carousel-track { display: flex; }
+  .carousel-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 52px;
+    align-items: center;
+    padding: 8px;
+  }
+  .carousel-slide .step {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 12px;
+  }
+  .carousel-slide h3 { font-size: 27px; margin: 0 0 16px; letter-spacing: -0.01em; }
+  .carousel-slide p { font-size: 16.5px; color: var(--text-secondary); margin: 0; max-width: 420px; }
+  .carousel-slide .shot {
+    background: var(--surface-alt);
     border: 1px solid var(--gridline);
-    box-shadow: 0 18px 40px rgba(16, 24, 40, 0.08);
+    border-radius: 18px;
+    padding: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 340px;
+  }
+  .carousel-slide img {
+    width: 100%;
+    max-height: 460px;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 22px 50px rgba(16, 24, 40, 0.14);
     display: block;
   }
-  .showcase-grid figcaption {
-    font-size: 13.5px;
-    color: var(--text-muted);
-    margin-top: 12px;
-    text-align: center;
+
+  .carousel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 36px;
   }
+  .carousel-controls button.arrow {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--gridline);
+    background: var(--page);
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .carousel-controls button.arrow:hover { background: var(--surface-alt); }
+  .carousel-controls .dots { display: flex; align-items: center; gap: 8px; }
+  .carousel-controls .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gridline);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  .carousel-controls .dot.active { background: var(--accent); width: 22px; border-radius: 4px; }
 
   /* Closing CTA */
   section.closing {
@@ -213,8 +274,11 @@
   @media (max-width: 760px) {
     .hero h1 { font-size: 34px; }
     .feature-grid { grid-template-columns: repeat(2, 1fr); }
-    .showcase-grid { grid-template-columns: 1fr; }
     .nav-links { gap: 16px; }
+    .carousel-slide { grid-template-columns: 1fr; gap: 24px; }
+    .carousel-slide .shot { min-height: 220px; padding: 14px; }
+    .carousel-slide img { max-height: 280px; }
+    .carousel-slide p { max-width: none; }
   }
 </style>
 </head>
@@ -305,36 +369,121 @@
     <div class="wrap">
       <div class="head">
         <h2>See it in action</h2>
-        <p class="sub">Works reading English or Finnish, and remembers everything you've looked up.</p>
+        <p class="sub">Works reading English or Finnish, and remembers everything you've looked up. Scroll or use the arrows to see more.</p>
       </div>
-      <div class="showcase-grid">
-        <figure>
-          <img src="assets/screenshot-1-translate-popup.png" alt="Sanoja showing an English word translated to Finnish on a webpage" />
-          <figcaption>English → Finnish, right on the page</figcaption>
-        </figure>
-        <figure>
-          <img src="assets/screenshot-6-finnish-to-english.png" alt="Sanoja translating a Finnish word to English on a Finnish-language page" />
-          <figcaption>Works reading Finnish, too</figcaption>
-        </figure>
-        <figure>
-          <img src="assets/screenshot-2-practice.png" alt="Sanoja's spaced-repetition practice screen" />
-          <figcaption>Quick, untimed review sessions</figcaption>
-        </figure>
-        <figure>
-          <img src="assets/screenshot-3-word-list.png" alt="Sanoja's saved word list with a known-words section" />
-          <figcaption>Every word you've looked up, searchable</figcaption>
-        </figure>
-        <figure>
-          <img src="assets/screenshot-4-word-cloud.png" alt="Sanoja's word cloud view" />
-          <figcaption>A word cloud of everything you've learned</figcaption>
-        </figure>
-        <figure>
-          <img src="assets/screenshot-5-toolbar.png" alt="Sanoja's toolbar popup" />
-          <figcaption>Toggle auto-speak from the toolbar</figcaption>
-        </figure>
+
+      <div class="carousel-viewport">
+        <div class="carousel-track">
+
+          <div class="carousel-slide">
+            <div class="info">
+              <div class="step">1 · Select any word</div>
+              <h3>Translate instantly, right on the page</h3>
+              <p>Double-click an English word — or highlight a short phrase — and a small card pops up with the Finnish translation. No popup windows, no switching tabs.</p>
+            </div>
+            <div class="shot"><img src="assets/screenshot-1-translate-popup.png" alt="Sanoja showing an English word translated to Finnish on a webpage" /></div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="info">
+              <div class="step">2 · Works both ways</div>
+              <h3>Reading Finnish? It works in reverse too</h3>
+              <p>Select a Finnish word on a Finnish-language page and Sanoja shows you the English translation instead — detected automatically, no language picker.</p>
+            </div>
+            <div class="shot"><img src="assets/screenshot-6-finnish-to-english.png" alt="Sanoja translating a Finnish word to English on a Finnish-language page" /></div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="info">
+              <div class="step">3 · Review what you've learned</div>
+              <h3>Quick, untimed practice sessions</h3>
+              <p>Every word you look up gets scheduled for review with a Leitner-box spaced-repetition system — get it right and it comes back in 3 days, then a week, then longer.</p>
+            </div>
+            <div class="shot"><img src="assets/screenshot-2-practice.png" alt="Sanoja's spaced-repetition practice screen" /></div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="info">
+              <div class="step">4 · Everything in one place</div>
+              <h3>Every word you've looked up, searchable</h3>
+              <p>Search, sort, and export your full word list any time, with a separate collapsed section for words you already know well.</p>
+            </div>
+            <div class="shot"><img src="assets/screenshot-3-word-list.png" alt="Sanoja's saved word list with a known-words section" /></div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="info">
+              <div class="step">5 · See your progress</div>
+              <h3>A word cloud of everything you've learned</h3>
+              <p>Switch to the word-cloud view for a quick visual sense of what you've been reading — the bigger the word, the more often you've looked it up.</p>
+            </div>
+            <div class="shot"><img src="assets/screenshot-4-word-cloud.png" alt="Sanoja's word cloud view" /></div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="info">
+              <div class="step">6 · Tune it to how you read</div>
+              <h3>Toggle auto-speak from the toolbar</h3>
+              <p>Turn the extension on or off, or enable automatic pronunciation every time you select a word, right from the toolbar popup.</p>
+            </div>
+            <div class="shot"><img src="assets/screenshot-5-toolbar.png" alt="Sanoja's toolbar popup" /></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="carousel-controls">
+        <button class="arrow prev" type="button" aria-label="Previous screenshot">←</button>
+        <div class="dots"></div>
+        <button class="arrow next" type="button" aria-label="Next screenshot">→</button>
       </div>
     </div>
   </section>
+
+  <script>
+    (function () {
+      var viewport = document.querySelector('.carousel-viewport');
+      var slides = document.querySelectorAll('.carousel-slide');
+      var dotsWrap = document.querySelector('.dots');
+      var prevBtn = document.querySelector('.carousel-controls .prev');
+      var nextBtn = document.querySelector('.carousel-controls .next');
+      var count = slides.length;
+
+      slides.forEach(function (_, i) {
+        var d = document.createElement('button');
+        d.className = 'dot' + (i === 0 ? ' active' : '');
+        d.type = 'button';
+        d.setAttribute('aria-label', 'Go to screenshot ' + (i + 1));
+        d.addEventListener('click', function () { goTo(i); });
+        dotsWrap.appendChild(d);
+      });
+      var dots = document.querySelectorAll('.dot');
+
+      function current() {
+        return Math.round(viewport.scrollLeft / viewport.clientWidth);
+      }
+
+      function goTo(i) {
+        i = Math.max(0, Math.min(count - 1, i));
+        viewport.scrollTo({ left: viewport.clientWidth * i, behavior: 'smooth' });
+      }
+
+      function updateDots() {
+        var i = current();
+        dots.forEach(function (d, idx) { d.classList.toggle('active', idx === i); });
+      }
+
+      prevBtn.addEventListener('click', function () { goTo(current() - 1); });
+      nextBtn.addEventListener('click', function () { goTo(current() + 1); });
+
+      var t;
+      viewport.addEventListener('scroll', function () {
+        clearTimeout(t);
+        t = setTimeout(updateDots, 80);
+      });
+      window.addEventListener('resize', function () { goTo(current()); });
+    })();
+  </script>
 
   <section class="closing">
     <div class="wrap">
