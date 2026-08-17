@@ -29,6 +29,7 @@
   }
   a { color: var(--accent); }
   .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  .wrap.wrap-wide { max-width: 1280px; }
 
   header.nav {
     padding: 20px 0;
@@ -182,7 +183,7 @@
     flex: 0 0 100%;
     scroll-snap-align: start;
     display: grid;
-    grid-template-columns: 0.85fr 1.15fr;
+    grid-template-columns: 0.62fr 1.38fr;
     gap: 52px;
     align-items: center;
     padding: 8px;
@@ -198,21 +199,15 @@
   .carousel-slide h3 { font-size: 27px; margin: 0 0 16px; letter-spacing: -0.01em; }
   .carousel-slide p { font-size: 16.5px; color: var(--text-secondary); margin: 0; max-width: 420px; }
   .carousel-slide .shot {
-    background: var(--surface-alt);
-    border: 1px solid var(--gridline);
-    border-radius: 18px;
-    padding: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 340px;
+    min-height: 420px;
   }
   .carousel-slide img {
     width: 100%;
-    max-height: 460px;
+    max-height: 560px;
     object-fit: contain;
-    border-radius: 10px;
-    box-shadow: 0 22px 50px rgba(16, 24, 40, 0.14);
     display: block;
   }
 
@@ -276,8 +271,8 @@
     .feature-grid { grid-template-columns: repeat(2, 1fr); }
     .nav-links { gap: 16px; }
     .carousel-slide { grid-template-columns: 1fr; gap: 24px; }
-    .carousel-slide .shot { min-height: 220px; padding: 14px; }
-    .carousel-slide img { max-height: 280px; }
+    .carousel-slide .shot { min-height: 240px; }
+    .carousel-slide img { max-height: 320px; }
     .carousel-slide p { max-width: none; }
   }
 </style>
@@ -366,7 +361,7 @@
   </section>
 
   <section class="showcase">
-    <div class="wrap">
+    <div class="wrap wrap-wide">
       <div class="head">
         <h2>See it in action</h2>
         <p class="sub">Works reading English or Finnish, and remembers everything you've looked up. Scroll or use the arrows to see more.</p>
