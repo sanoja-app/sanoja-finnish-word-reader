@@ -9,42 +9,24 @@ privacy policy URL, and the GitHub repo gives you one for free).
 You have git installed already (checked: git 2.34.1). No `gh` CLI, so
 we'll create the repo on github.com and push from Terminal.
 
-**Create the repo:**
+**Already done:** the repo is live at
+`https://github.com/sanoja-app/sanoja-finnish-word-reader`, under a free
+GitHub Organization ("sanoja-app") rather than a personal username, so
+nothing in the URL identifies you personally. Commit authorship is set to
+"Sanoja" with a GitHub-provided noreply email, for the same reason.
 
-1. Go to https://github.com/new
-2. Repository name: `sanoja-finnish-word-reader` (or whatever you prefer)
-3. Visibility: **Public**
-4. Do **not** check "Add a README" / .gitignore / license — this folder
-   already has all of that. Click **Create repository**.
-5. GitHub will show you a repo URL like
-   `https://github.com/<your-username>/sanoja-finnish-word-reader.git` —
-   copy it.
-
-**Push from Terminal:**
+**Pushing further changes from Terminal:**
 
 ```bash
 cd ~/Desktop/sanoja-finnish-word-reader
-
-# Optional but recommended — set your identity for this repo specifically
-# (use your GitHub "noreply" email if you'd rather not expose your real
-# one publicly — Settings → Emails on github.com has it):
-git config user.name "Your Name"
-git config user.email "you@example.com"
-
-git init
 git add -A
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/<your-username>/sanoja-finnish-word-reader.git
-git push -u origin main
+git commit -m "Describe what changed"
+git push
 ```
 
-That's it — refresh the GitHub page and your code, README, and screenshots
-should all be there.
-
-Your privacy policy is now live at:
-`https://github.com/<your-username>/sanoja-finnish-word-reader/blob/main/PRIVACY.md`
-— GitHub renders it as a normal readable page. You'll need this URL for
+Your privacy policy is live at:
+`https://github.com/sanoja-app/sanoja-finnish-word-reader/blob/main/PRIVACY.md`
+— GitHub renders it as a normal readable page. This is the URL used for
 the Chrome Web Store submission below.
 
 ## 2. Publish to the Chrome Web Store

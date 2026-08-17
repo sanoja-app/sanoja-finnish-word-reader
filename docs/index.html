@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sanoja — Learn Finnish as you browse</title>
+<meta name="description" content="Select or double-click any word on the web to translate it between English and Finnish, hear it, and review it later with spaced repetition." />
+<link rel="icon" href="assets/icon128.png" />
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7;
+    --surface: #ffffff;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --gridline: #e1e0d9;
+    --accent: #2962ff;
+    --accent-dark: #1a3fd6;
+    --accent-soft: rgba(41, 98, 255, 0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  a { color: var(--accent); }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+
+  header.nav {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--gridline);
+  }
+  header.nav .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 17px;
+  }
+  .brand img { width: 30px; height: 30px; border-radius: 50%; }
+  .nav-links { display: flex; gap: 24px; font-size: 14px; font-weight: 600; }
+  .nav-links a { color: var(--text-secondary); text-decoration: none; }
+  .nav-links a:hover { color: var(--accent); }
+
+  .hero {
+    background: linear-gradient(160deg, var(--accent) 0%, var(--accent-dark) 100%);
+    color: white;
+    padding: 80px 0 100px;
+  }
+  .hero .wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .hero h1 {
+    font-size: 46px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin: 0 0 18px;
+  }
+  .hero p.lead {
+    font-size: 19px;
+    color: rgba(255,255,255,0.9);
+    max-width: 460px;
+    margin: 0 0 30px;
+  }
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 22px;
+    border-radius: 9px;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    border: 1px solid transparent;
+  }
+  .btn-primary { background: white; color: var(--accent-dark); }
+  .btn-primary:hover { background: #f0f0f0; }
+  .btn-ghost { border-color: rgba(255,255,255,0.5); color: white; }
+  .btn-ghost:hover { background: rgba(255,255,255,0.12); }
+  .hero-shot {
+    border-radius: 12px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+    width: 100%;
+    display: block;
+  }
+
+  section.features { padding: 90px 0; }
+  section.features h2 {
+    font-size: 30px;
+    text-align: center;
+    margin: 0 0 10px;
+  }
+  section.features p.sub {
+    text-align: center;
+    color: var(--text-secondary);
+    max-width: 520px;
+    margin: 0 auto 56px;
+    font-size: 16px;
+  }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--gridline);
+    border-radius: 14px;
+    padding: 28px;
+  }
+  .feature-card .icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .feature-card h3 { font-size: 17px; margin: 0 0 8px; }
+  .feature-card p { font-size: 14.5px; color: var(--text-secondary); margin: 0; }
+
+  section.showcase { padding: 0 0 100px; }
+  .showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .showcase-grid img {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--gridline);
+    display: block;
+  }
+  .showcase-grid figure { margin: 0; }
+  .showcase-grid figcaption {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  section.privacy-band {
+    background: var(--surface);
+    border-top: 1px solid var(--gridline);
+    border-bottom: 1px solid var(--gridline);
+    padding: 56px 0;
+    text-align: center;
+  }
+  section.privacy-band h2 { font-size: 22px; margin: 0 0 12px; }
+  section.privacy-band p { color: var(--text-secondary); max-width: 560px; margin: 0 auto; font-size: 15px; }
+
+  footer { padding: 40px 0 60px; }
+  footer .wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+  footer a { color: var(--text-secondary); text-decoration: none; margin-left: 18px; }
+  footer a:hover { color: var(--accent); }
+
+  @media (max-width: 760px) {
+    .hero .wrap { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 34px; }
+    .feature-grid, .showcase-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="wrap">
+      <div class="brand"><img src="assets/icon128.png" alt="" />Sanoja</div>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader">Source</a>
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader/blob/main/PRIVACY.md">Privacy</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <h1>Learn Finnish as you browse.</h1>
+        <p class="lead">
+          Select or double-click any word on the web. Sanoja translates it
+          between English and Finnish, reads it aloud, and saves it so you
+          can review it later — for free, with no account and no tracking.
+        </p>
+        <div class="cta-row">
+          <!--
+            Once the Chrome Web Store listing is approved, replace this
+            href with the real listing URL
+            (https://chromewebstore.google.com/detail/<extension-id>).
+          -->
+          <a class="btn btn-primary" href="https://github.com/sanoja-app/sanoja-finnish-word-reader#how-to-install-unpacked-for-testing">Install Sanoja</a>
+          <a class="btn btn-ghost" href="https://github.com/sanoja-app/sanoja-finnish-word-reader">View source on GitHub</a>
+        </div>
+      </div>
+      <img class="hero-shot" src="assets/screenshot-1-translate-popup.png" alt="Sanoja showing an English word translated to Finnish on a webpage" />
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="wrap">
+      <h2>Built for reading, not flashcards</h2>
+      <p class="sub">Vocabulary that shows up while you're already reading something you care about sticks a lot better than a word list.</p>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="icon">↔</div>
+          <h3>Both directions, automatically</h3>
+          <p>Select an English word and see it in Finnish, or a Finnish word and see it in English — detected automatically, no language picker.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔊</div>
+          <h3>Hear it, correctly</h3>
+          <p>Click the speaker icon to hear the Finnish pronunciation, using your browser's own text-to-speech — always the Finnish side, since that's the point.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🧠</div>
+          <h3>Spaced-repetition review</h3>
+          <p>Every word you look up is saved automatically. A Leitner-box quiz brings words back at increasing intervals until they actually stick.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">✓</div>
+          <h3>Words you know, tracked separately</h3>
+          <p>Get a word right consistently and it graduates out of active review into a "known words" list — progress you can actually see.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="showcase">
+    <div class="wrap">
+      <div class="showcase-grid">
+        <figure>
+          <img src="assets/screenshot-6-finnish-to-english.png" alt="Sanoja translating a Finnish word to English on a Finnish-language page" />
+          <figcaption>Works reading Finnish, too</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/screenshot-2-practice.png" alt="Sanoja's spaced-repetition practice screen" />
+          <figcaption>Quick, untimed review sessions</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/screenshot-3-word-list.png" alt="Sanoja's saved word list with a known-words section" />
+          <figcaption>Every word you've looked up, searchable</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="privacy-band">
+    <div class="wrap">
+      <h2>No accounts. No ads. No tracking.</h2>
+      <p>
+        Your word list and progress stay on your computer. The only network
+        request Sanoja makes is the translation lookup itself, and only for
+        text you explicitly select. Read the full
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader/blob/main/PRIVACY.md">privacy policy</a>.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <span>Sanoja is an independent open-source project, MIT licensed.</span>
+      <div>
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader">GitHub</a>
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader/issues">Support</a>
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader/blob/main/LICENSE">License</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
