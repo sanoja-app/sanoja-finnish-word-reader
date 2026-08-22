@@ -28,10 +28,10 @@ Every word you look up is saved automatically into a word log, so you can
 come back and actually learn it instead of just glancing at a translation
 and moving on:
 
-- **Spaced-repetition quiz** — A Leitner box system. Get a word right and it comes back in a few days, then a week, then a couple weeks, then a month; get it wrong and it comes back tomorrow.
-- **Known words section** — Get a word right consistently and it graduates to a known words section, separate from what you're still actively learning.
-- **Word list and word-cloud view** — Everything you've saved, searchable and sortable. Bigger words = looked up more often.
-- **Daily streak** — Build a streak for finishing your reviews each day.
+- Spaced-repetition quiz (a Leitner box system) — get a word right and it comes back in a few days, then a week, then a couple weeks, then a month; get it wrong and it comes back tomorrow.
+- Get a word right consistently and it graduates to a "known words" section, separate from what you're still actively learning.
+- A word list and word-cloud view of everything you've saved, searchable and sortable.
+- A daily streak for finishing your reviews.
 
 No accounts, no ads, no tracking. Your word list and progress are saved
 locally in your browser and never leave your computer — the only network
