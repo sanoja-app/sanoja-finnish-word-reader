@@ -68,10 +68,10 @@ Click the speaker icon to hear the Finnish word spoken aloud.
 
 ## Features
 
-- **Spaced-repetition quiz** — A Leitner box system that adapts to how well you know each word. Get a word right and it comes back in a few days, then a week, then two weeks, then a month; get it wrong and it comes back tomorrow.
-- **Known words section** — Get a word right consistently and it graduates to a separate "words you know well" section, out of your active learning rotation.
-- **Word list & cloud view** — Browse everything you've saved with a searchable, sortable list or a visual word cloud (bigger word = you've looked it up more often).
-- **Daily streak** — Build a streak for finishing your reviews each day. Skip a day and it resets.
+- Spaced-repetition quiz (a Leitner box system) — get a word right and it comes back in a few days, then a week, then a couple weeks, then a month; get it wrong and it comes back tomorrow.
+- Get a word right consistently and it graduates to a "known words" section, separate from what you're still actively learning.
+- A word list and word-cloud view of everything you've saved, searchable and sortable.
+- A daily streak for finishing your reviews.
 
 ## About the voice
 
