@@ -336,6 +336,39 @@ header h1 {
   background: var(--row-hover);
 }
 
+.box-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+}
+
+.box-badge.box-1 {
+  background: #ef5350;
+}
+
+.box-badge.box-2 {
+  background: #fb8c00;
+}
+
+.box-badge.box-3 {
+  background: #fdd835;
+  color: #0b0b0b;
+}
+
+.box-badge.box-4 {
+  background: #7cb342;
+}
+
+.box-badge.box-5 {
+  background: #1b5e20;
+}
+
 .cloud-view {
   background: var(--surface);
   border: 1px solid var(--gridline);

@@ -284,9 +284,18 @@
   // Only single-word selections get logged to the word list — dragging across
   // a whole sentence still shows a translation popup, it just doesn't pollute
   // the saved word log (which is meant for vocabulary, not sentences).
+  // Also filters out pure numbers and URLs which aren't useful vocabulary.
   function isSingleWord(str) {
     const trimmed = str.trim();
-    return trimmed.length > 0 && !/\s/.test(trimmed);
+    // Must be a single word (no whitespace)
+    if (trimmed.length === 0 || /\s/.test(trimmed)) return false;
+    // Must contain at least one letter (not just numbers or symbols)
+    if (!/\p{L}/u.test(trimmed)) return false;
+    // Must not contain numbers (vocabulary shouldn't have digits mixed in)
+    if (/\p{N}/u.test(trimmed)) return false;
+    // Must not be a URL
+    if (/^https?:\/\/|^www\./i.test(trimmed)) return false;
+    return true;
   }
 
   // Strips leading/trailing punctuation (a trailing period from a
@@ -336,13 +345,14 @@
       // translation — computed once and reused for both saving the word and
       // speaking it.
       const cleanedSource = stripEdgePunctuation(text.trim());
-      const cleanedTranslated = stripEdgePunctuation(result.translatedText.trim());
+      const cleanedTranslated = stripEdgePunctuation((result.translatedText || "").trim());
       const finnishText = result.translatedLangCode === "fi" ? cleanedTranslated : cleanedSource;
       const englishText = result.translatedLangCode === "en" ? cleanedTranslated : cleanedSource;
 
       // Save the word for later review — only when a single word was
-      // selected, not a phrase or full sentence.
-      if (isSingleWord(text) && finnishText && englishText) {
+      // selected, not a phrase or full sentence. Also validate the cleaned
+      // versions to ensure the translation didn't introduce unwanted content.
+      if (isSingleWord(text) && isSingleWord(finnishText) && isSingleWord(englishText)) {
         saveWord(finnishText, englishText);
       }
 

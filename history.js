@@ -284,6 +284,14 @@ function renderList(words) {
     tdCount.className = "count";
     tdCount.textContent = String(w.count);
 
+    const tdBox = document.createElement("td");
+    tdBox.className = "box";
+    const boxNum = w.box || 1;
+    const boxBadge = document.createElement("span");
+    boxBadge.className = `box-badge box-${boxNum}`;
+    boxBadge.textContent = boxNum;
+    tdBox.appendChild(boxBadge);
+
     const tdLast = document.createElement("td");
     tdLast.className = "lastseen";
     tdLast.textContent = formatDate(w.lastSeen);
@@ -296,7 +304,7 @@ function renderList(words) {
     delBtn.addEventListener("click", () => deleteWord(w.key));
     tdDel.appendChild(delBtn);
 
-    tr.append(tdFi, tdEn, tdCount, tdLast, tdDel);
+    tr.append(tdFi, tdEn, tdCount, tdBox, tdLast, tdDel);
     listBody.appendChild(tr);
   });
 }
@@ -380,7 +388,29 @@ function renderPracticeIntro() {
   // yes/no on whether there's something ready.
   const due = getDueWords();
   if (due.length === 0) {
-    dueText.textContent = "Nothing to review right now — nice work.";
+    // Show when the next word will be ready
+    const active = getActiveWords();
+    if (active.length === 0) {
+      dueText.textContent = "Nothing to review right now — nice work.";
+    } else {
+      const nextReviewDates = active
+        .map((w) => new Date(w.nextReview || w.lastSeen || new Date()))
+        .filter((d) => d > new Date());
+      if (nextReviewDates.length > 0) {
+        const earliest = new Date(Math.min(...nextReviewDates.map((d) => d.getTime())));
+        const daysUntil = Math.ceil((earliest - new Date()) / (24 * 60 * 60 * 1000));
+        if (daysUntil === 0) {
+          // Due today but might not have been fetched yet, or due in < 1 hour
+          dueText.textContent = "Next word available soon — check back later today.";
+        } else if (daysUntil === 1) {
+          dueText.textContent = "Next word available tomorrow.";
+        } else {
+          dueText.textContent = `Next word available in ${daysUntil} days.`;
+        }
+      } else {
+        dueText.textContent = "Nothing to review right now — nice work.";
+      }
+    }
     startDueBtn.hidden = true;
   } else {
     dueText.textContent = "A few words are ready to review.";
