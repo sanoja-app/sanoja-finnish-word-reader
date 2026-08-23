@@ -39,6 +39,7 @@ const dueText = document.getElementById("dueText");
 const startDueBtn = document.getElementById("startDueBtn");
 const startAllBtn = document.getElementById("startAllBtn");
 const quizCard = document.getElementById("quizCard");
+const exitQuizBtn = document.getElementById("exitQuizBtn");
 const flashCard = document.getElementById("flashCard");
 const quizProgress = document.getElementById("quizProgress");
 const quizFinnish = document.getElementById("quizFinnish");
@@ -75,6 +76,7 @@ function populateIcons() {
   cleanupBtn.innerHTML = `${iconSvg("trash", 15)}Clean up sentences`;
   clearBtn.innerHTML = `${iconSvg("trash", 15)}Clear all`;
   quizSpeakBtn.innerHTML = iconSvg("volume", 16);
+  exitQuizBtn.innerHTML = iconSvg("x", 14);
   gradeWrongBtn.innerHTML = `${iconSvg("x", 14)}Didn't know it`;
   gradeRightBtn.innerHTML = `${iconSvg("check", 14)}Knew it`;
 }
@@ -470,6 +472,14 @@ function finishQuiz() {
   loadWords(); // refresh due counts / list in the background
 }
 
+// Leaving mid-session loses nothing: only *graded* cards affect the
+// schedule, and those were already written to storage as they were graded.
+// Whatever's still sitting in the queue is just dropped.
+function exitQuiz() {
+  quizQueue = [];
+  loadWords(); // refreshes due counts to reflect any cards graded before exiting, then re-renders the intro
+}
+
 function gradeCard(known) {
   const card = quizQueue[0];
   flashCard.classList.add("card-exit");
@@ -643,6 +653,7 @@ clearBtn.addEventListener("click", () => {
   }
 });
 
+exitQuizBtn.addEventListener("click", exitQuiz);
 startDueBtn.addEventListener("click", () => startQuiz(true));
 startAllBtn.addEventListener("click", () => startQuiz(false));
 showAnswerBtn.addEventListener("click", () => {

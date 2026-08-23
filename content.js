@@ -161,47 +161,33 @@
   // We try Finnish first (the common case); if the selected text turns out to
   // already be Finnish, we make a second call to get the English translation.
   //
-  // Google's auto-detection is unreliable on a single isolated SHORT word
-  // with no surrounding context — tokens that are valid words in both
-  // languages (e.g. "on", a common English preposition that's also the most
-  // frequent verb form in Finnish) regularly get misdetected, which is what
-  // caused Finnish audio to come out as English on an English page. When
-  // that happens AND it disagrees with what the page itself declares
-  // (<html lang="...">), the page is a much stronger signal for a token this
-  // short, so we re-run the lookup with the source forced instead of
-  // trusting auto-detect twice. Restricted to short text on purpose: longer
-  // selections are rarely ambiguous between these two languages, and this
-  // shouldn't override a real Finnish phrase quoted inside an English page.
-  const AMBIGUOUS_LENGTH_THRESHOLD = 4;
+  // Google's auto-detection is unreliable on a single isolated word with no
+  // surrounding context. Two distinct failure modes showed up in testing:
+  //
+  // 1. Cognates that are valid words in both languages (e.g. "on", a common
+  //    English preposition that's also the most frequent Finnish verb form)
+  //    regularly get misdetected as English even on a Finnish page.
+  // 2. Ordinary Finnish vocabulary — "talo" (house), "kirja" (book), "vesi"
+  //    (water) — regularly gets misdetected as an unrelated third language
+  //    (Somali, Estonian, ...) rather than "fi", which then poisons the
+  //    translation ("talo" -> "neuvoja" instead of "house"). This isn't
+  //    limited to short words, so it can't be fixed with a length cutoff.
+  //
+  // For (1), the page's declared language (<html lang="...">) is a stronger
+  // signal than Google's single-word guess, so we re-run the lookup with the
+  // source forced when they disagree. For (2), Google naming some third
+  // language isn't a usable answer for a tool that only ever deals in
+  // English and Finnish — instead we settle it with a round-trip: force the
+  // word through as Finnish, then translate that result back. Landing back
+  // on the original word means it really was Finnish, regardless of what the
+  // page around it happens to be written in.
+  function normalizeForCompare(str) {
+    return stripEdgePunctuation((str || "").trim()).toLowerCase();
+  }
 
   async function translateBidirectional(text) {
     const first = await callTranslateApi(text, "fi");
-    let detected = first.detectedLang;
-
-    const pageLang = (document.documentElement.lang || "").toLowerCase().slice(0, 2);
-    const isShort = text.trim().length <= AMBIGUOUS_LENGTH_THRESHOLD;
-    const detectionIsSuspect =
-      isShort &&
-      ((detected === "fi" && pageLang === "en") || (detected !== "fi" && pageLang === "fi"));
-
-    if (detectionIsSuspect) {
-      if (pageLang === "fi") {
-        const forced = await callTranslateApi(text, "en", "fi");
-        return {
-          sourceLangName: "Finnish",
-          translatedText: forced.translatedText,
-          translatedLangCode: "en",
-          translatedLangName: "English",
-        };
-      }
-      const forced = await callTranslateApi(text, "fi", "en");
-      return {
-        sourceLangName: "English",
-        translatedText: forced.translatedText,
-        translatedLangCode: "fi",
-        translatedLangName: "Finnish",
-      };
-    }
+    const detected = first.detectedLang;
 
     if (detected === "fi") {
       const second = await callTranslateApi(text, "en");
@@ -212,6 +198,43 @@
         translatedLangName: "English",
       };
     }
+
+    const pageLang = (document.documentElement.lang || "").toLowerCase().slice(0, 2);
+
+    if (detected === "en") {
+      if (pageLang === "fi") {
+        const forced = await callTranslateApi(text, "en", "fi");
+        return {
+          sourceLangName: "Finnish",
+          translatedText: forced.translatedText,
+          translatedLangCode: "en",
+          translatedLangName: "English",
+        };
+      }
+      return {
+        sourceLangName: "English",
+        translatedText: first.translatedText,
+        translatedLangCode: "fi",
+        translatedLangName: "Finnish",
+      };
+    }
+
+    // Google named some third language — not trustworthy for a two-language
+    // tool. Force it through as Finnish and check whether translating that
+    // result back lands on the original word.
+    const asFinnish = await callTranslateApi(text, "en", "fi");
+    const roundTrip = await callTranslateApi(asFinnish.translatedText, "fi", "en");
+    const roundTripMatches = normalizeForCompare(roundTrip.translatedText) === normalizeForCompare(text);
+
+    if (roundTripMatches || pageLang === "fi") {
+      return {
+        sourceLangName: "Finnish",
+        translatedText: asFinnish.translatedText,
+        translatedLangCode: "en",
+        translatedLangName: "English",
+      };
+    }
+
     return {
       sourceLangName: "English",
       translatedText: first.translatedText,

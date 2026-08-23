@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Sanoja - Read Words in Finnish",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "Translate any word between English and Finnish as you browse, hear it pronounced, and review it later with spaced repetition.",
   "permissions": ["storage"],
   "host_permissions": [
