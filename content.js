@@ -185,6 +185,22 @@
     return stripEdgePunctuation((str || "").trim()).toLowerCase();
   }
 
+  // Exact match is too strict for a round-trip check on Finnish: the same
+  // word in a different grammatical case (e.g. "sikaruttoa", partitive, vs.
+  // "sikarutto", nominative) is a correct round-trip but not an equal
+  // string. Comparing shared prefixes tolerates case-ending drift without
+  // treating unrelated words as a match.
+  function roundTripStemsMatch(a, b) {
+    a = normalizeForCompare(a);
+    b = normalizeForCompare(b);
+    if (!a || !b) return false;
+    if (a === b) return true;
+    const minLen = Math.min(a.length, b.length);
+    if (minLen < 4) return false;
+    const prefixLen = Math.max(4, minLen - 2);
+    return a.slice(0, prefixLen) === b.slice(0, prefixLen);
+  }
+
   async function translateBidirectional(text) {
     const first = await callTranslateApi(text, "fi");
     const detected = first.detectedLang;
@@ -201,30 +217,23 @@
 
     const pageLang = (document.documentElement.lang || "").toLowerCase().slice(0, 2);
 
-    if (detected === "en") {
-      if (pageLang === "fi") {
-        const forced = await callTranslateApi(text, "en", "fi");
-        return {
-          sourceLangName: "Finnish",
-          translatedText: forced.translatedText,
-          translatedLangCode: "en",
-          translatedLangName: "English",
-        };
-      }
+    if (detected === "en" && pageLang === "fi") {
+      const forced = await callTranslateApi(text, "en", "fi");
       return {
-        sourceLangName: "English",
-        translatedText: first.translatedText,
-        translatedLangCode: "fi",
-        translatedLangName: "Finnish",
+        sourceLangName: "Finnish",
+        translatedText: forced.translatedText,
+        translatedLangCode: "en",
+        translatedLangName: "English",
       };
     }
 
-    // Google named some third language — not trustworthy for a two-language
-    // tool. Force it through as Finnish and check whether translating that
+    // Google named "en" without the page backing it up, or named some third
+    // language entirely — neither is trustworthy for a two-language tool.
+    // Force the text through as Finnish and check whether translating that
     // result back lands on the original word.
     const asFinnish = await callTranslateApi(text, "en", "fi");
     const roundTrip = await callTranslateApi(asFinnish.translatedText, "fi", "en");
-    const roundTripMatches = normalizeForCompare(roundTrip.translatedText) === normalizeForCompare(text);
+    const roundTripMatches = roundTripStemsMatch(roundTrip.translatedText, text);
 
     if (roundTripMatches || pageLang === "fi") {
       return {
