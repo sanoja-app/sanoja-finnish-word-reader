@@ -368,8 +368,19 @@
     try {
       const result = await translateBidirectional(text);
       originalLabelEl.textContent = result.sourceLangName;
-      translatedLabelEl.textContent = result.translatedLangName;
-      translatedEl.textContent = result.translatedText;
+
+      // Proper nouns (names like "Kupiainen") and true cross-language
+      // cognates come back from Google unchanged — same word on both sides.
+      // Presenting that as a normal translation just reads as "it didn't
+      // translate", so call it out instead of silently repeating the word.
+      const untranslated = normalizeForCompare(result.translatedText) === normalizeForCompare(text);
+      if (untranslated) {
+        translatedLabelEl.textContent = "Note";
+        translatedEl.textContent = "Same in both languages (likely a name)";
+      } else {
+        translatedLabelEl.textContent = result.translatedLangName;
+        translatedEl.textContent = result.translatedText;
+      }
       translatedEl.classList.remove("sanoja-skeleton");
       speakBtn.disabled = false;
 
@@ -382,9 +393,11 @@
       const englishText = result.translatedLangCode === "en" ? cleanedTranslated : cleanedSource;
 
       // Save the word for later review — only when a single word was
-      // selected, not a phrase or full sentence. Also validate the cleaned
-      // versions to ensure the translation didn't introduce unwanted content.
-      if (isSingleWord(text) && isSingleWord(finnishText) && isSingleWord(englishText)) {
+      // selected, not a phrase or full sentence, and it actually translated
+      // to something (an untranslated proper noun isn't useful vocabulary).
+      // Also validate the cleaned versions to ensure the translation didn't
+      // introduce unwanted content.
+      if (!untranslated && isSingleWord(text) && isSingleWord(finnishText) && isSingleWord(englishText)) {
         saveWord(finnishText, englishText);
       }
 

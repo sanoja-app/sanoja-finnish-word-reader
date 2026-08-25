@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Feedback — Sanoja</title>
+<meta name="description" content="Share feedback, report a bug, or suggest a feature for Sanoja, the Finnish word reader extension." />
+<link rel="icon" href="assets/icon128.png" />
+<style>
+  :root {
+    color-scheme: light;
+    --page: #ffffff;
+    --surface-alt: #f7f8fa;
+    --text-primary: #0b0e14;
+    --text-secondary: #57606f;
+    --text-muted: #8a92a3;
+    --gridline: #e7e9ee;
+    --accent: #2962ff;
+    --accent-dark: #1a3fd6;
+    --accent-soft: #e8edff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  a { color: var(--accent); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  header.nav { padding: 20px 0; border-bottom: 1px solid var(--gridline); }
+  header.nav .wrap { display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; text-decoration: none; color: var(--text-primary); }
+  .brand img { width: 28px; height: 28px; border-radius: 50%; }
+  .nav-links { display: flex; align-items: center; gap: 28px; font-size: 14px; font-weight: 600; }
+  .nav-links a { color: var(--text-secondary); text-decoration: none; }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-cta { background: var(--accent); color: white !important; padding: 9px 18px; border-radius: 999px; font-weight: 700; }
+  .nav-cta:hover { background: var(--accent-dark); }
+
+  .doc-hero { padding: 64px 0 8px; text-align: center; }
+  .doc-hero h1 { font-size: 36px; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .doc-hero p.sub { color: var(--text-secondary); font-size: 16px; max-width: 480px; margin: 0 auto; }
+
+  .doc { max-width: 620px; margin: 0 auto; padding: 40px 24px 100px; }
+
+  .card {
+    background: var(--surface-alt);
+    border: 1px solid var(--gridline);
+    border-radius: 16px;
+    padding: 32px;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: 0 0 8px;
+  }
+  .field { margin-bottom: 20px; }
+  .field:last-of-type { margin-bottom: 0; }
+  select, input[type="text"], textarea {
+    width: 100%;
+    font: inherit;
+    font-size: 15px;
+    color: var(--text-primary);
+    background: var(--page);
+    border: 1px solid var(--gridline);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  select:focus, input[type="text"]:focus, textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+  textarea { resize: vertical; min-height: 140px; }
+
+  .actions { margin-top: 28px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 24px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .actions .note { font-size: 13px; color: var(--text-muted); }
+
+  .alt {
+    margin-top: 32px;
+    text-align: center;
+    font-size: 14.5px;
+    color: var(--text-secondary);
+  }
+
+  footer { padding: 40px 0 56px; border-top: 1px solid var(--gridline); }
+  footer .wrap {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px; font-size: 13.5px; color: var(--text-muted);
+  }
+  footer a { color: var(--text-secondary); text-decoration: none; margin-left: 18px; }
+  footer a:hover { color: var(--accent); }
+
+  @media (max-width: 760px) {
+    .doc-hero h1 { font-size: 28px; }
+    .nav-links { gap: 16px; }
+    .card { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html"><img src="assets/icon128.png" alt="" />Sanoja</a>
+      <nav class="nav-links">
+        <a href="index.html#features">Features</a>
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader">Source</a>
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader#how-to-install-unpacked-for-testing" class="nav-cta">Install Sanoja</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="doc-hero">
+    <div class="wrap">
+      <h1>Send feedback</h1>
+      <p class="sub">Found a bug, a mistranslation, or have an idea for Sanoja? Let us know below.</p>
+    </div>
+  </section>
+
+  <article class="doc">
+    <div class="card">
+      <form id="feedback-form">
+        <div class="field">
+          <label for="fb-type">Type</label>
+          <select id="fb-type" name="type">
+            <option value="Bug report">Bug report</option>
+            <option value="Mistranslation">Mistranslation</option>
+            <option value="Feature request">Feature request</option>
+            <option value="General feedback">General feedback</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fb-message">Your feedback</label>
+          <textarea id="fb-message" name="message" placeholder="What happened, or what would you like to see? Include the word/page if it's a translation issue." required></textarea>
+        </div>
+        <div class="field">
+          <label for="fb-contact">Your email (optional)</label>
+          <input type="text" id="fb-contact" name="contact" placeholder="So we can follow up, if needed" />
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Send feedback</button>
+          <span class="note">Opens your email app to send it to us.</span>
+        </div>
+      </form>
+    </div>
+  </article>
+
+  <script>
+    (function () {
+      var form = document.getElementById('feedback-form');
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var type = document.getElementById('fb-type').value;
+        var message = document.getElementById('fb-message').value.trim();
+        var contact = document.getElementById('fb-contact').value.trim();
+
+        var body = message;
+        if (contact) body += '\n\nReply to: ' + contact;
+
+        var subject = 'Sanoja feedback: ' + type;
+        var mailto = 'mailto:shahzainhtc@gmail.com'
+          + '?subject=' + encodeURIComponent(subject)
+          + '&body=' + encodeURIComponent(body);
+        window.location.href = mailto;
+      });
+    })();
+  </script>
+
+  <footer>
+    <div class="wrap">
+      <span>Sanoja is an independent open-source project, MIT licensed.</span>
+      <div>
+        <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader">GitHub</a>
+        <a href="index.html">Home</a>
+        <a href="privacy.html">Privacy</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

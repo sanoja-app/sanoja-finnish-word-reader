@@ -2,6 +2,7 @@ const enabledEl = document.getElementById("enabled");
 const autoSpeakEl = document.getElementById("autoSpeak");
 const reviewBtn = document.getElementById("reviewWords");
 const statLine = document.getElementById("statLine");
+const feedbackLink = document.getElementById("feedbackLink");
 
 chrome.storage.sync.get(
   { sanojaEnabled: true, sanojaAutoSpeak: false },
@@ -21,6 +22,11 @@ autoSpeakEl.addEventListener("change", () => {
 
 reviewBtn.addEventListener("click", () => {
   chrome.tabs.create({ url: chrome.runtime.getURL("history.html") });
+});
+
+feedbackLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  chrome.tabs.create({ url: "https://sanoja-app.github.io/sanoja-finnish-word-reader/feedback.html" });
 });
 
 chrome.storage.local.get({ sanojaWords: {}, sanojaStreak: null }, ({ sanojaWords, sanojaStreak }) => {
