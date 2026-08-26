@@ -1,0 +1,27 @@
+# Sanoja
+
+> Sanoja is a free, open-source Chrome/Edge/Brave browser extension for learning Finnish vocabulary. Select or double-click any word on any webpage and it translates between English and Finnish (direction auto-detected), reads the Finnish word aloud, and saves it to a local spaced-repetition word list for later review.
+
+Sanoja is aimed at people learning Finnish (or English-speaking people living in Finland) who want vocabulary lookup to happen inline while reading real content on the web, rather than switching to a separate translator app or flashcard deck. It has no account system, no ads, no analytics, and no tracking — the word list is stored only in the browser's local extension storage on the user's own device.
+
+Key facts:
+- Free and open source (MIT licensed).
+- Works in both directions: English word selected -> Finnish translation; Finnish word selected -> English translation. Direction is auto-detected, no language picker.
+- Pronunciation: reads the Finnish word aloud using the browser's built-in text-to-speech.
+- Spaced repetition: every looked-up word is saved automatically and scheduled for review using a Leitner-box system (correct answers space out to longer intervals; wrong answers reset to the next day).
+- Desktop Chrome/Edge/Brave only (not iOS/Android Chrome).
+- Translation is done via Google Translate's public web endpoint; no API key or cost to the user.
+
+## Install
+
+- [Chrome Web Store listing](https://chromewebstore.google.com/detail/sanoja-read-words-in-finn/eoiodkapeakjcapimphbcjmijddaadjk): install page.
+
+## Docs
+
+- [Landing page](https://sanoja-app.github.io/sanoja-finnish-word-reader/): overview, screenshots, FAQ.
+- [Privacy policy](https://sanoja-app.github.io/sanoja-finnish-word-reader/privacy.html): exactly what data the extension touches.
+- [Source code and README](https://github.com/sanoja-app/sanoja-finnish-word-reader): full technical documentation, install instructions, and feature list.
+
+## Optional
+
+- [Feedback page](https://sanoja-app.github.io/sanoja-finnish-word-reader/feedback.html): how to report bugs or request features.
