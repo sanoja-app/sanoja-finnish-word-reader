@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sanoja-app.github.io/sanoja-finnish-word-reader/sitemap.xml

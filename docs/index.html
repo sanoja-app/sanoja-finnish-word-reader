@@ -4,8 +4,85 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sanoja — Learn Finnish as you browse</title>
-<meta name="description" content="Select or double-click any word on the web to translate it between English and Finnish, hear it, and review it later with spaced repetition." />
+<meta name="description" content="Select or double-click any word on the web to translate it between English and Finnish, hear it, and review it later with spaced repetition. Free Chrome extension, no account, no tracking." />
+<link rel="canonical" href="https://sanoja-app.github.io/sanoja-finnish-word-reader/" />
 <link rel="icon" href="assets/icon128.png" />
+
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sanoja-app.github.io/sanoja-finnish-word-reader/" />
+<meta property="og:title" content="Sanoja — Learn Finnish as you browse" />
+<meta property="og:description" content="Select or double-click any word on the web to translate it between English and Finnish, hear it, and review it later with spaced repetition. Free, no account, no tracking." />
+<meta property="og:image" content="https://sanoja-app.github.io/sanoja-finnish-word-reader/assets/screenshot-1-translate-popup.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Sanoja — Learn Finnish as you browse" />
+<meta name="twitter:description" content="Select or double-click any word on the web to translate it between English and Finnish, hear it, and review it later with spaced repetition." />
+<meta name="twitter:image" content="https://sanoja-app.github.io/sanoja-finnish-word-reader/assets/screenshot-1-translate-popup.png" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Sanoja — Read Words in Finnish",
+  "url": "https://sanoja-app.github.io/sanoja-finnish-word-reader/",
+  "applicationCategory": "BrowserApplication",
+  "operatingSystem": "Chrome, Edge, Brave",
+  "description": "Select or double-click any word on the web to translate it between English and Finnish, hear it pronounced, and review it later with spaced repetition.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "image": "https://sanoja-app.github.io/sanoja-finnish-word-reader/assets/screenshot-1-translate-popup.png"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I translate Finnish words while browsing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Install the Sanoja Chrome extension, then double-click or highlight any word on a webpage. Sanoja detects whether it's English or Finnish and shows the translation instantly in a small popup, right on the page."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Sanoja free to use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Sanoja is completely free and open source, with no account, subscription, ads, or tracking."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Sanoja work in both directions, English to Finnish and Finnish to English?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Sanoja automatically detects the language of the word you select and translates it the other way — no language picker needed."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I hear how a Finnish word is pronounced?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Every translation popup has a speaker icon that reads the Finnish word aloud using your browser's built-in text-to-speech."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Sanoja save the words I look up?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Every word you look up is saved automatically to a local word list on your device, with a spaced-repetition quiz (Leitner system) to help you review and remember them over time."
+      }
+    }
+  ]
+}
+</script>
 <style>
   :root {
     color-scheme: light;
@@ -245,6 +322,25 @@
   .carousel-controls .dot.active { background: var(--accent); width: 22px; border-radius: 4px; }
 
   /* Closing CTA */
+  section.faq { padding: 80px 0; }
+  section.faq .head { text-align: center; margin-bottom: 40px; }
+  section.faq h2 { font-size: 30px; margin: 0 0 10px; }
+  .faq-list { max-width: 720px; margin: 0 auto; }
+  .faq-item {
+    border-bottom: 1px solid var(--gridline);
+    padding: 18px 0;
+  }
+  .faq-item summary {
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 16px;
+    list-style: none;
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::before { content: "+ "; color: var(--accent); }
+  .faq-item[open] summary::before { content: "− "; }
+  .faq-item p { color: var(--text-secondary); font-size: 15px; margin: 12px 0 0; }
+
   section.closing {
     background: var(--surface-alt);
     padding: 72px 0;
@@ -284,6 +380,7 @@
       <div class="brand"><img src="assets/icon128.png" alt="" />Sanoja</div>
       <nav class="nav-links">
         <a href="#features">Features</a>
+        <a href="#faq">FAQ</a>
         <a href="https://github.com/sanoja-app/sanoja-finnish-word-reader">Source</a>
         <a href="feedback.html">Feedback</a>
         <a href="privacy.html">Privacy</a>
@@ -475,6 +572,36 @@
       window.addEventListener('resize', function () { goTo(current()); });
     })();
   </script>
+
+  <section class="faq" id="faq">
+    <div class="wrap">
+      <div class="head">
+        <h2>Frequently asked questions</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item" open>
+          <summary>How do I translate Finnish words while browsing?</summary>
+          <p>Install the Sanoja Chrome extension, then double-click or highlight any word on a webpage. Sanoja detects whether it's English or Finnish and shows the translation instantly in a small popup, right on the page.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is Sanoja free to use?</summary>
+          <p>Yes. Sanoja is completely free and open source, with no account, subscription, ads, or tracking.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Does Sanoja work in both directions, English to Finnish and Finnish to English?</summary>
+          <p>Yes. Sanoja automatically detects the language of the word you select and translates it the other way — no language picker needed.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I hear how a Finnish word is pronounced?</summary>
+          <p>Yes. Every translation popup has a speaker icon that reads the Finnish word aloud using your browser's built-in text-to-speech.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Does Sanoja save the words I look up?</summary>
+          <p>Yes. Every word you look up is saved automatically to a local word list on your device, with a spaced-repetition quiz (Leitner system) to help you review and remember them over time.</p>
+        </details>
+      </div>
+    </div>
+  </section>
 
   <section class="closing">
     <div class="wrap">
