@@ -427,14 +427,33 @@
     }
   }
 
-  function getSelectionRectAndText() {
+  // On pages built from web components (e.g. tori.fi), a selection whose
+  // text lives inside a shadow root gets a Range that Chrome reports as
+  // collapsed to 0x0 at the origin, even though selection.toString() still
+  // returns the right text — the main-document Range/Selection API can't
+  // expose real geometry for something anchored inside a shadow tree. That
+  // 0x0 rect used to make us bail out entirely, so the popup silently never
+  // appeared on such sites. Falling back to the click coordinates (always
+  // valid, shadow DOM or not) keeps the popup working there too.
+  function getSelectionRectAndText(fallbackPoint) {
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return null;
     const text = selection.toString().trim();
     if (!text) return null;
     const range = selection.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-    if (!rect || (rect.width === 0 && rect.height === 0)) return null;
+    let rect = range.getBoundingClientRect();
+    const rectIsEmpty = !rect || (rect.width === 0 && rect.height === 0);
+    if (rectIsEmpty) {
+      if (!fallbackPoint) return null;
+      rect = {
+        top: fallbackPoint.y,
+        bottom: fallbackPoint.y,
+        left: fallbackPoint.x,
+        right: fallbackPoint.x,
+        width: 0,
+        height: 0,
+      };
+    }
     return { text, rect };
   }
 
@@ -443,9 +462,10 @@
     if (popupEl && popupEl.contains(e.target)) return;
     if (isEditableTarget(e.target)) return;
 
+    const fallbackPoint = { x: e.clientX, y: e.clientY };
     // Let the browser finish updating the selection first.
     setTimeout(() => {
-      const sel = getSelectionRectAndText();
+      const sel = getSelectionRectAndText(fallbackPoint);
       if (sel) handleSelectionText(sel.text, sel.rect);
     }, 0);
   });
@@ -454,8 +474,9 @@
     if (!settings.enabled) return;
     if (isEditableTarget(e.target)) return;
 
+    const fallbackPoint = { x: e.clientX, y: e.clientY };
     setTimeout(() => {
-      const sel = getSelectionRectAndText();
+      const sel = getSelectionRectAndText(fallbackPoint);
       if (sel) handleSelectionText(sel.text, sel.rect);
     }, 0);
   });
