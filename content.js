@@ -52,6 +52,9 @@
     const el = document.createElement("div");
     el.id = "sanoja-popup";
 
+    const row = document.createElement("div");
+    row.className = "sanoja-row";
+
     const textWrap = document.createElement("div");
     textWrap.className = "sanoja-text";
 
@@ -81,8 +84,9 @@
     speakBtn.innerHTML = iconSvg("volume", 15);
     speakBtn.disabled = true;
 
-    el.appendChild(textWrap);
-    el.appendChild(speakBtn);
+    row.appendChild(textWrap);
+    row.appendChild(speakBtn);
+    el.appendChild(row);
 
     document.body.appendChild(el);
 
@@ -337,6 +341,28 @@
     return str.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
   }
 
+  // Shown once, ever, the first time a word is actually saved — not on
+  // install or on every new device, since that pattern (extensions
+  // reopening a tab or nagging every time Chrome Sync adds them to a fresh
+  // browser) is exactly what this is meant to avoid. Stored in sync storage
+  // so once it's been seen on any one device, it stays dismissed everywhere.
+  function maybeShowSaveHint(popupElAtSaveTime) {
+    chrome.storage.sync.get({ sanojaSeenSaveHint: false }, ({ sanojaSeenSaveHint }) => {
+      if (sanojaSeenSaveHint) return;
+      chrome.storage.sync.set({ sanojaSeenSaveHint: true });
+      // The word card may have already been dismissed by the time this
+      // storage round-trip resolves — only attach the hint if it's still
+      // the same popup that's on screen.
+      if (popupEl !== popupElAtSaveTime || !popupEl) return;
+
+      const hint = document.createElement("div");
+      hint.className = "sanoja-hint";
+      hint.textContent =
+        "Saved for later. Open the Sanoja icon in your toolbar to review it.";
+      popupEl.appendChild(hint);
+    });
+  }
+
   function saveWord(finnish, english) {
     const key = finnish.trim().toLowerCase();
     if (!key) return;
@@ -399,6 +425,7 @@
       // introduce unwanted content.
       if (!untranslated && isSingleWord(text) && isSingleWord(finnishText) && isSingleWord(englishText)) {
         saveWord(finnishText, englishText);
+        maybeShowSaveHint(popupEl);
       }
 
       // Always speak the Finnish side, no matter which direction the lookup
