@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Sanoja - Read Words in Finnish",
-  "version": "2.1.10",
-  "description": "Translate any word between English and Finnish as you browse, hear it pronounced, and review it later with spaced repetition.",
+  "name": "Sanoja - Finnish Translator & Dictionary",
+  "version": "2.1.11",
+  "description": "Finnish translator & dictionary: select any word on the web to translate English ↔ Finnish, hear it, and review with flashcards.",
   "permissions": ["storage"],
   "host_permissions": [
     "https://translate.googleapis.com/*"
