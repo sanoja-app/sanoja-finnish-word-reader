@@ -4,10 +4,10 @@ Copy-paste these into the corresponding fields in the Developer Dashboard
 when you submit (chrome.google.com/webstore/devconsole).
 
 ## Extension name
-Sanoja - Read Words in Finnish
+Sanoja - Finnish Translator & Dictionary
 
-## Summary (short description, 132 characters max — this one is 117)
-Select or double-click any word on the web to translate it between English and Finnish, hear it, and review it later.
+## Summary (short description, 132 characters max — this one is 130)
+Finnish translator & dictionary: select any word on the web to translate English ↔ Finnish, hear it, and review with flashcards.
 
 ## Category
 Education
@@ -17,7 +17,8 @@ English
 
 ## Detailed description
 
-Sanoja turns the pages you're already reading into Finnish practice.
+Sanoja is a Finnish translator and dictionary that turns the pages you're
+already reading into Finnish vocabulary practice.
 
 Select or double-click a word or short phrase on any webpage. If it's
 English, you'll see it in Finnish; if it's Finnish, you'll see it in
@@ -28,7 +29,7 @@ Every word you look up is saved automatically into a word log, so you can
 come back and actually learn it instead of just glancing at a translation
 and moving on:
 
-- Spaced-repetition quiz (a Leitner box system) — get a word right and it comes back in a few days, then a week, then a couple weeks, then a month; get it wrong and it comes back tomorrow.
+- Spaced-repetition flashcard quiz (a Leitner box system) — get a word right and it comes back in a few days, then a week, then a couple weeks, then a month; get it wrong and it comes back tomorrow.
 - Get a word right consistently and it graduates to a "known words" section, separate from what you're still actively learning.
 - A word list and word-cloud view of everything you've saved, searchable and sortable.
 - A daily streak for finishing your reviews.
