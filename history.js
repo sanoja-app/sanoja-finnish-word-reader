@@ -38,7 +38,7 @@ const clearBtn = document.getElementById("clearBtn");
 const emptyState = document.getElementById("emptyState");
 const listView = document.getElementById("listView");
 const listBody = document.getElementById("listBody");
-const loadMoreBtn = document.getElementById("loadMoreBtn");
+const pagination = document.getElementById("pagination");
 const cloudView = document.getElementById("cloudView");
 const masteredDetails = document.getElementById("masteredDetails");
 const masteredSummary = document.getElementById("masteredSummary");
@@ -71,8 +71,9 @@ let subView = "list"; // 'list' | 'cloud', within the Words section
 // The list view has no limit on how many words someone can save, and
 // rendering every row at once turns into one long unbroken scroll once a
 // vocabulary gets into the hundreds. Paging it keeps the table itself
-// short; search and sort still operate over the full filtered set, not
-// just what's currently shown.
+// short — actual pages (1, 2, 3…), not an accumulating "load more" that
+// just makes that same long list a little at a time. Search and sort still
+// operate over the full filtered set, not just the current page.
 const LIST_PAGE_SIZE = 50;
 let listPage = 1;
 
@@ -223,13 +224,13 @@ function renderWordsSection() {
   cloudView.hidden = !hasAny || subView !== "cloud";
 
   if (!hasAny) {
-    loadMoreBtn.hidden = true;
+    pagination.hidden = true;
     return;
   }
   if (subView === "list") {
     renderList(filtered);
   } else {
-    loadMoreBtn.hidden = true;
+    pagination.hidden = true;
     renderCloud(filtered);
   }
 }
@@ -301,12 +302,13 @@ function unmasterWord(key) {
 
 function renderList(words) {
   listBody.textContent = "";
-  const visibleCount = Math.min(words.length, listPage * LIST_PAGE_SIZE);
-  const remaining = words.length - visibleCount;
-  loadMoreBtn.hidden = remaining <= 0;
-  loadMoreBtn.textContent = `Load ${Math.min(remaining, LIST_PAGE_SIZE)} more (${remaining} left)`;
 
-  words.slice(0, visibleCount).forEach((w) => {
+  const totalPages = Math.max(1, Math.ceil(words.length / LIST_PAGE_SIZE));
+  if (listPage > totalPages) listPage = totalPages; // e.g. after deleting words off the last page
+  renderPagination(totalPages);
+
+  const start = (listPage - 1) * LIST_PAGE_SIZE;
+  words.slice(start, start + LIST_PAGE_SIZE).forEach((w) => {
     const tr = document.createElement("tr");
 
     const tdFi = document.createElement("td");
@@ -344,6 +346,49 @@ function renderList(words) {
     tr.append(tdFi, tdEn, tdCount, tdBox, tdLast, tdDel);
     listBody.appendChild(tr);
   });
+}
+
+// Numbered page buttons, windowed around the current page (first, last,
+// and a couple neighbors) with "…" gaps so a huge word list doesn't turn
+// into a huge row of page buttons.
+function renderPagination(totalPages) {
+  pagination.hidden = totalPages <= 1;
+  pagination.textContent = "";
+  if (totalPages <= 1) return;
+
+  const goTo = (page) => {
+    listPage = page;
+    renderWordsSection();
+  };
+
+  const addButton = (label, page, { disabled = false, active = false } = {}) => {
+    const btn = document.createElement("button");
+    btn.className = "page-btn" + (active ? " active" : "");
+    btn.textContent = label;
+    btn.disabled = disabled;
+    if (!disabled && !active) btn.addEventListener("click", () => goTo(page));
+    pagination.appendChild(btn);
+  };
+
+  addButton("‹", listPage - 1, { disabled: listPage === 1 });
+
+  const shown = new Set([1, totalPages, listPage - 1, listPage, listPage + 1]);
+  let lastShown = 0;
+  [...shown]
+    .filter((p) => p >= 1 && p <= totalPages)
+    .sort((a, b) => a - b)
+    .forEach((p) => {
+      if (lastShown && p - lastShown > 1) {
+        const gap = document.createElement("span");
+        gap.className = "page-gap";
+        gap.textContent = "…";
+        pagination.appendChild(gap);
+      }
+      addButton(String(p), p, { active: p === listPage });
+      lastShown = p;
+    });
+
+  addButton("›", listPage + 1, { disabled: listPage === totalPages });
 }
 
 function renderCloud(words) {
@@ -660,10 +705,6 @@ searchEl.addEventListener("input", () => {
 });
 sortByEl.addEventListener("change", () => {
   listPage = 1;
-  renderWordsSection();
-});
-loadMoreBtn.addEventListener("click", () => {
-  listPage += 1;
   renderWordsSection();
 });
 

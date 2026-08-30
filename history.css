@@ -273,12 +273,49 @@ header h1 {
   font-size: 13px;
 }
 
-.load-more-btn {
-  display: block;
-  width: 100%;
-  margin-top: 10px;
-  text-align: center;
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 14px;
+}
+
+.page-btn {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--gridline);
+  background: var(--surface);
+  color: var(--text-secondary);
+  border-radius: 7px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: var(--row-hover);
+}
+
+.page-btn:disabled {
+  color: var(--text-muted);
+  cursor: default;
+  opacity: 0.5;
+}
+
+.page-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  cursor: default;
+}
+
+.page-gap {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 0 2px;
 }
 
 .list-view {
