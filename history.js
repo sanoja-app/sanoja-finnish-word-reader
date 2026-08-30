@@ -9,6 +9,15 @@ const isDarkMode = window.matchMedia && window.matchMedia("(prefers-color-scheme
 const BOX_INTERVAL_DAYS = { 1: 1, 2: 3, 3: 7, 4: 14, 5: 30 };
 const MAX_BOX = 5;
 
+function boxDescription(boxNum) {
+  const days = BOX_INTERVAL_DAYS[boxNum] || 1;
+  const whenNext = days === 1 ? "tomorrow" : `in ${days} days`;
+  if (boxNum >= MAX_BOX) {
+    return `Stage ${boxNum} — get it right once more and it moves to your known words. Get it wrong and it resets to Stage 1.`;
+  }
+  return `Stage ${boxNum} — get it right and it won't come back until ${whenNext}. Get it wrong and it resets to Stage 1.`;
+}
+
 const statLine = document.getElementById("statLine");
 
 const segPractice = document.getElementById("segPractice");
@@ -29,6 +38,7 @@ const clearBtn = document.getElementById("clearBtn");
 const emptyState = document.getElementById("emptyState");
 const listView = document.getElementById("listView");
 const listBody = document.getElementById("listBody");
+const loadMoreBtn = document.getElementById("loadMoreBtn");
 const cloudView = document.getElementById("cloudView");
 const masteredDetails = document.getElementById("masteredDetails");
 const masteredSummary = document.getElementById("masteredSummary");
@@ -54,14 +64,29 @@ const gradeRightBtn = document.getElementById("gradeRightBtn");
 const quizDone = document.getElementById("quizDone");
 const quizDoneText = document.getElementById("quizDoneText");
 const quizAgainBtn = document.getElementById("quizAgainBtn");
+const practiceMoreBtn = document.getElementById("practiceMoreBtn");
 
 let allWords = []; // [{ key, finnish, english, count, firstSeen, lastSeen, box, nextReview }]
 let subView = "list"; // 'list' | 'cloud', within the Words section
+// The list view has no limit on how many words someone can save, and
+// rendering every row at once turns into one long unbroken scroll once a
+// vocabulary gets into the hundreds. Paging it keeps the table itself
+// short; search and sort still operate over the full filtered set, not
+// just what's currently shown.
+const LIST_PAGE_SIZE = 50;
+let listPage = 1;
 
 // Quiz session state
 let quizQueue = [];
 let quizPracticeMode = false;
 let quizStats = { correct: 0, total: 0 };
+// "Practice all words" pulls from every active word, which can be a large
+// pile — thrown at you all at once that reads as a backlog, exactly what
+// the due-queue screen deliberately avoids showing as a raw count. Capping
+// a single session and letting you start another batch keeps that same
+// spirit instead of dumping everything in one sitting.
+const PRACTICE_BATCH_SIZE = 20;
+let practicePoolSize = 0;
 
 // ---------- Icons ----------
 
@@ -197,10 +222,14 @@ function renderWordsSection() {
   listView.hidden = !hasAny || subView !== "list";
   cloudView.hidden = !hasAny || subView !== "cloud";
 
-  if (!hasAny) return;
+  if (!hasAny) {
+    loadMoreBtn.hidden = true;
+    return;
+  }
   if (subView === "list") {
     renderList(filtered);
   } else {
+    loadMoreBtn.hidden = true;
     renderCloud(filtered);
   }
 }
@@ -272,7 +301,12 @@ function unmasterWord(key) {
 
 function renderList(words) {
   listBody.textContent = "";
-  words.forEach((w) => {
+  const visibleCount = Math.min(words.length, listPage * LIST_PAGE_SIZE);
+  const remaining = words.length - visibleCount;
+  loadMoreBtn.hidden = remaining <= 0;
+  loadMoreBtn.textContent = `Load ${Math.min(remaining, LIST_PAGE_SIZE)} more (${remaining} left)`;
+
+  words.slice(0, visibleCount).forEach((w) => {
     const tr = document.createElement("tr");
 
     const tdFi = document.createElement("td");
@@ -292,6 +326,7 @@ function renderList(words) {
     const boxBadge = document.createElement("span");
     boxBadge.className = `box-badge box-${boxNum}`;
     boxBadge.textContent = boxNum;
+    boxBadge.title = boxDescription(boxNum);
     tdBox.appendChild(boxBadge);
 
     const tdLast = document.createElement("td");
@@ -428,7 +463,10 @@ function shuffle(arr) {
 function startQuiz(dueOnly) {
   const source = dueOnly ? getDueWords() : getActiveWords();
   if (!source.length) return;
-  quizQueue = shuffle(source).map((w) => ({ ...w, requeued: false }));
+  practicePoolSize = source.length;
+  const shuffled = shuffle(source);
+  const batch = dueOnly ? shuffled : shuffled.slice(0, PRACTICE_BATCH_SIZE);
+  quizQueue = batch.map((w) => ({ ...w, requeued: false }));
   quizPracticeMode = !dueOnly;
   quizStats = { correct: 0, total: 0 };
 
@@ -463,10 +501,19 @@ function finishQuiz() {
   quizCard.hidden = true;
   quizDone.hidden = false;
   const { correct, total } = quizStats;
+  const remaining = practicePoolSize - total;
   if (quizPracticeMode) {
-    quizDoneText.textContent = `Done practicing ${total} word${total === 1 ? "" : "s"}.`;
+    quizDoneText.textContent =
+      remaining > 0
+        ? `Done practicing ${total} of ${practicePoolSize} words.`
+        : `Done practicing ${total} word${total === 1 ? "" : "s"}.`;
+    practiceMoreBtn.hidden = remaining <= 0;
+    if (remaining > 0) {
+      practiceMoreBtn.textContent = `Practice another ${Math.min(PRACTICE_BATCH_SIZE, remaining)}`;
+    }
   } else {
     quizDoneText.textContent = `Session complete — ${correct}/${total} correct.`;
+    practiceMoreBtn.hidden = true;
     if (total > 0) updateStreak();
   }
   loadWords(); // refresh due counts / list in the background
@@ -607,8 +654,18 @@ async function speakFinnish(text) {
 
 // ---------- Wiring ----------
 
-searchEl.addEventListener("input", renderWordsSection);
-sortByEl.addEventListener("change", renderWordsSection);
+searchEl.addEventListener("input", () => {
+  listPage = 1; // a new search is a new list — start back at the top of it
+  renderWordsSection();
+});
+sortByEl.addEventListener("change", () => {
+  listPage = 1;
+  renderWordsSection();
+});
+loadMoreBtn.addEventListener("click", () => {
+  listPage += 1;
+  renderWordsSection();
+});
 
 segPractice.addEventListener("click", () => setSegment("practice"));
 segWords.addEventListener("click", () => setSegment("words"));
@@ -668,6 +725,8 @@ quizAgainBtn.addEventListener("click", () => {
   quizDone.hidden = true;
   renderPracticeIntro();
 });
+
+practiceMoreBtn.addEventListener("click", () => startQuiz(false));
 
 // ---------- Init ----------
 

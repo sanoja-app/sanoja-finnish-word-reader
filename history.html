@@ -56,6 +56,7 @@
 
         <div id="quizDone" class="quiz-done" hidden>
           <p id="quizDoneText"></p>
+          <button id="practiceMoreBtn" class="primary-btn" hidden></button>
           <button id="quizAgainBtn" class="ghost-btn">Back</button>
         </div>
       </div>
@@ -101,13 +102,14 @@
             <th>Finnish</th>
             <th>English</th>
             <th>Seen</th>
-            <th>Box</th>
+            <th title="How well you know each word, from Stage 1 (just started) to Stage 5 (almost known). Get a word right and it moves up a stage with a longer gap before it comes back; get it wrong and it resets to Stage 1.">Stage ⓘ</th>
             <th>Last seen</th>
             <th></th>
           </tr>
         </thead>
         <tbody id="listBody"></tbody>
       </table>
+      <button id="loadMoreBtn" class="ghost-btn load-more-btn" hidden></button>
 
       <div id="cloudView" class="cloud-view" hidden></div>
 

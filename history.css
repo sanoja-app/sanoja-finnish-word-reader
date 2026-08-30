@@ -273,6 +273,14 @@ header h1 {
   font-size: 13px;
 }
 
+.load-more-btn {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
 .list-view {
   width: 100%;
   border-collapse: collapse;
