@@ -44,8 +44,7 @@ chrome.storage.local.get({ sanojaWords: {}, sanojaStreak: null }, ({ sanojaWords
   statLine.innerHTML = `${words.length} word${words.length === 1 ? "" : "s"}` +
     (masteredCount > 0 ? ` · ${masteredCount} known` : "") + streakBadge;
 
-  // No count on the button either — just a quiet dot when something's ready.
   reviewBtn.innerHTML = dueCount > 0
-    ? `${iconSvg("book", 16)}Practice<span class="ready-dot"></span>`
+    ? `${iconSvg("book", 16)}Practice (${dueCount})`
     : `${iconSvg("book", 16)}Browse words`;
 });

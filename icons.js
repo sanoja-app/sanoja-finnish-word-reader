@@ -19,6 +19,7 @@ const ICONS = {
   volume: '<path d="M4 9.5v5h3.6l4.9 3.8V5.7L7.6 9.5H4z"/><path d="M16.8 8.3a5 5 0 010 7.4"/><path d="M19.6 5.5a9 9 0 010 13"/>',
   check: '<polyline points="4,12.5 9,17.5 20,6"/>',
   flame: '<path d="M12 2.5c1 3-3 4-3 8a3 3 0 006 0c0-1-1-1.8-1-2.8 2 1 3.3 3 3.3 5.3a5.3 5.3 0 01-10.6 0c0-4.3 3.3-6.5 5.3-10.5z"/>',
+  shuffle: '<polyline points="16,3 21,3 21,8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21,16 21,21 16,21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/>',
 };
 
 // Returns raw SVG markup (as an HTML string) for the given icon name, sized

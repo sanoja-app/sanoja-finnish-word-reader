@@ -10,12 +10,15 @@ const BOX_INTERVAL_DAYS = { 1: 1, 2: 3, 3: 7, 4: 14, 5: 30 };
 const MAX_BOX = 5;
 
 function boxDescription(boxNum) {
+  // "At least" rather than a fixed date — nothing pushes a reminder on that
+  // day, it just becomes eligible again then. Someone who doesn't open the
+  // app for a week still sees it, just later than the minimum wait.
   const days = BOX_INTERVAL_DAYS[boxNum] || 1;
-  const whenNext = days === 1 ? "tomorrow" : `in ${days} days`;
+  const wait = days === 1 ? "a day" : `${days} days`;
   if (boxNum >= MAX_BOX) {
-    return `Stage ${boxNum} — get it right once more and it moves to your known words. Get it wrong and it resets to Stage 1.`;
+    return `Stage ${boxNum} of ${MAX_BOX} — get it right once more and it moves to your known words. Get it wrong and it drops back to Stage 1.`;
   }
-  return `Stage ${boxNum} — get it right and it won't come back until ${whenNext}. Get it wrong and it resets to Stage 1.`;
+  return `Stage ${boxNum} of ${MAX_BOX} — get it right and it moves to Stage ${boxNum + 1}, so it won't show up again for at least ${wait}. Get it wrong and it drops back to Stage 1.`;
 }
 
 const statLine = document.getElementById("statLine");
@@ -48,10 +51,16 @@ const quizIntro = document.getElementById("quizIntro");
 const dueText = document.getElementById("dueText");
 const startDueBtn = document.getElementById("startDueBtn");
 const startAllBtn = document.getElementById("startAllBtn");
+const dueModeDesc = document.getElementById("dueModeDesc");
+const dueModeTag = document.getElementById("dueModeTag");
+const freeModeDesc = document.getElementById("freeModeDesc");
+const freeModeTag = document.getElementById("freeModeTag");
+const startModeBtn = document.getElementById("startModeBtn");
 const quizCard = document.getElementById("quizCard");
 const exitQuizBtn = document.getElementById("exitQuizBtn");
 const flashCard = document.getElementById("flashCard");
 const quizProgress = document.getElementById("quizProgress");
+const quizModeBadge = document.getElementById("quizModeBadge");
 const quizFinnish = document.getElementById("quizFinnish");
 const quizSpeakBtn = document.getElementById("quizSpeakBtn");
 const quizAnswerBlock = document.getElementById("quizAnswerBlock");
@@ -81,19 +90,80 @@ let listPage = 1;
 let quizQueue = [];
 let quizPracticeMode = false;
 let quizStats = { correct: 0, total: 0 };
-// "Practice all words" pulls from every active word, which can be a large
-// pile — thrown at you all at once that reads as a backlog, exactly what
-// the due-queue screen deliberately avoids showing as a raw count. Capping
-// a single session and letting you start another batch keeps that same
-// spirit instead of dumping everything in one sitting.
+// Which mode card is picked on the intro screen — "due" or "free" — before
+// Start is pressed. Reselected to a sensible default each time the intro
+// re-renders, but a manual pick during that same visit sticks.
+let selectedMode = null;
+// Both Focused Practice and Free Practice can pull in a large pile —
+// due dates cluster (add a bunch of words in one sitting and they all come
+// due together), and practice draws from every active word. Thrown at you
+// all at once, either reads as a backlog, exactly what the due-queue screen
+// deliberately avoids showing as a raw count. Capping a single session and
+// letting you start another batch keeps that same spirit instead of dumping
+// everything in one sitting.
 const PRACTICE_BATCH_SIZE = 20;
 let practicePoolSize = 0;
+
+// ---------- Tooltips ----------
+
+// One shared bubble appended to <body>, positioned from each trigger's own
+// bounding box on hover/focus. A per-trigger absolutely-positioned bubble
+// would get clipped by `.list-view`'s `overflow: hidden` (there to round
+// the table's corners) — living outside that container sidesteps it.
+const tooltipBubble = document.createElement("div");
+tooltipBubble.id = "sharedTooltip";
+tooltipBubble.className = "info-tip-bubble";
+tooltipBubble.setAttribute("role", "tooltip");
+document.body.appendChild(tooltipBubble);
+
+function showTooltip(trigger) {
+  const text = trigger.dataset.tip;
+  if (!text) return;
+  tooltipBubble.textContent = text;
+  tooltipBubble.classList.add("visible");
+  const rect = trigger.getBoundingClientRect();
+  const bubbleRect = tooltipBubble.getBoundingClientRect();
+  let left = rect.left + rect.width / 2 - bubbleRect.width / 2;
+  left = Math.max(8, Math.min(left, window.innerWidth - bubbleRect.width - 8));
+  let top = rect.top - bubbleRect.height - 9;
+  if (top < 8) top = rect.bottom + 9; // flip below when there's no room above
+  tooltipBubble.style.left = `${left}px`;
+  tooltipBubble.style.top = `${top}px`;
+}
+
+function hideTooltip() {
+  tooltipBubble.classList.remove("visible");
+}
+
+// The bubble's position is computed once, on hover/focus — a wheel scroll
+// (cursor doesn't move, so mouseleave never fires) would otherwise leave it
+// floating over its old coordinates while the trigger moves underneath it.
+window.addEventListener("scroll", hideTooltip, true);
+window.addEventListener("resize", hideTooltip);
+
+function initTooltip(el, text) {
+  if (text) el.dataset.tip = text;
+  el.classList.add("info-tip");
+  // Every trigger needs to be reachable by keyboard, not just the header's
+  // — a mouse-only tooltip on 50 row badges is the same gap the native
+  // `title` attribute this replaced already had.
+  if (!el.hasAttribute("tabindex")) el.tabIndex = 0;
+  el.setAttribute("aria-describedby", "sharedTooltip");
+  el.addEventListener("mouseenter", () => showTooltip(el));
+  el.addEventListener("mouseleave", hideTooltip);
+  el.addEventListener("focus", () => showTooltip(el));
+  el.addEventListener("blur", hideTooltip);
+}
+
+initTooltip(document.getElementById("stageInfoTip"));
 
 // ---------- Icons ----------
 
 function populateIcons() {
   segPractice.innerHTML = `${iconSvg("book", 15)}Practice`;
   segWords.innerHTML = `${iconSvg("list", 15)}Words`;
+  startDueBtn.querySelector(".mode-icon").innerHTML = iconSvg("book", 17);
+  startAllBtn.querySelector(".mode-icon").innerHTML = iconSvg("shuffle", 17);
   searchIcon.innerHTML = iconSvg("search", 14);
   subList.innerHTML = iconSvg("list", 15);
   subCloud.innerHTML = iconSvg("cloud", 15);
@@ -196,17 +266,9 @@ function render() {
   cleanupBtn.hidden = multiWordCount === 0;
   cleanupBtn.innerHTML = `${iconSvg("trash", 15)}Clean up sentences (${multiWordCount})`;
 
-  renderReadyDot();
   renderWordsSection();
   renderMasteredSection();
   renderPracticeIntro();
-}
-
-// A quiet dot on the Practice tab — not a number — hinting there's something
-// ready without turning it into a countdown/backlog.
-function renderReadyDot() {
-  const hasReady = getDueWords().length > 0;
-  segPractice.innerHTML = `${iconSvg("book", 15)}Practice` + (hasReady ? '<span class="ready-dot"></span>' : "");
 }
 
 function setSegment(segment) {
@@ -325,11 +387,13 @@ function renderList(words) {
     const tdBox = document.createElement("td");
     tdBox.className = "box";
     const boxNum = w.box || 1;
+    const boxTip = document.createElement("span");
     const boxBadge = document.createElement("span");
     boxBadge.className = `box-badge box-${boxNum}`;
     boxBadge.textContent = boxNum;
-    boxBadge.title = boxDescription(boxNum);
-    tdBox.appendChild(boxBadge);
+    boxTip.appendChild(boxBadge);
+    initTooltip(boxTip, boxDescription(boxNum));
+    tdBox.appendChild(boxTip);
 
     const tdLast = document.createElement("td");
     tdLast.className = "lastseen";
@@ -461,19 +525,33 @@ function exportCsv() {
 
 // ---------- Practice / Quiz ----------
 
+// Rotated instead of fixed so the intro card doesn't go stale on daily use —
+// picked fresh each render (page load, tab switch back from a finished
+// session, etc.). Each one is a template so the real due count is still
+// front and center, not traded away for the sake of sounding lively.
+const DUE_MODE_DESCRIPTIONS = [
+  (n) => `Catch ${n === 1 ? "your weakest word" : `your ${n} weakest words`} before ${n === 1 ? "it slips" : "they slip"}.`,
+  (n) => `${n} weakest word${n === 1 ? "" : "s"}, ready for a rematch.`,
+  (n) => `${n} word${n === 1 ? "" : "s"} to conquer today.`,
+];
+
 function renderPracticeIntro() {
   quizCard.hidden = true;
   quizDone.hidden = true;
   quizIntro.hidden = false;
-
-  // Deliberately no count here — "12 words due" reads like a backlog. Just a
-  // yes/no on whether there's something ready.
   const due = getDueWords();
+  const active = getActiveWords();
+  // Both cards already say "Nothing saved yet" when empty — a top line that
+  // still says "choose a mode" on top of that is a third way of saying
+  // there's nothing here instead of one clear one.
+  dueText.textContent =
+    due.length === 0 && active.length === 0 ? "Nothing saved yet." : "Choose a mode to practice.";
+
   if (due.length === 0) {
-    // Show when the next word will be ready
-    const active = getActiveWords();
+    startDueBtn.disabled = true;
+    dueModeTag.hidden = true;
     if (active.length === 0) {
-      dueText.textContent = "Nothing to review right now — nice work.";
+      dueModeDesc.textContent = "Nothing saved yet.";
     } else {
       const nextReviewDates = active
         .map((w) => new Date(w.nextReview || w.lastSeen || new Date()))
@@ -481,24 +559,76 @@ function renderPracticeIntro() {
       if (nextReviewDates.length > 0) {
         const earliest = new Date(Math.min(...nextReviewDates.map((d) => d.getTime())));
         const daysUntil = Math.ceil((earliest - new Date()) / (24 * 60 * 60 * 1000));
-        if (daysUntil === 0) {
-          // Due today but might not have been fetched yet, or due in < 1 hour
-          dueText.textContent = "Next word available soon — check back later today.";
-        } else if (daysUntil === 1) {
-          dueText.textContent = "Next word available tomorrow.";
-        } else {
-          dueText.textContent = `Next word available in ${daysUntil} days.`;
-        }
+        // "Next word" undersold this — whatever becomes due on that day
+        // could be one word or a whole cluster (same cause as the due-queue
+        // batch cap: a bunch of words added together all come due together).
+        // Count and, past the cap, say so the same way the "due now" and
+        // free-practice descriptions already do.
+        const countThen = nextReviewDates.filter(
+          (d) => d.toDateString() === earliest.toDateString()
+        ).length;
+        const when = daysUntil === 0 ? "later today" : daysUntil === 1 ? "tomorrow" : `in ${daysUntil} days`;
+        const capNote = countThen > PRACTICE_BATCH_SIZE ? `, in rounds of ${PRACTICE_BATCH_SIZE}` : "";
+        dueModeDesc.textContent = `${countThen} word${countThen === 1 ? "" : "s"} ready ${when}${capNote}.`;
       } else {
-        dueText.textContent = "Nothing to review right now — nice work.";
+        dueModeDesc.textContent = "Nothing due right now — nice work.";
       }
     }
-    startDueBtn.hidden = true;
   } else {
-    dueText.textContent = "A few words are ready to review.";
-    startDueBtn.hidden = false;
-    startDueBtn.innerHTML = `${iconSvg("book", 15)}Start reviewing`;
+    startDueBtn.disabled = false;
+    dueModeTag.hidden = false;
+    // Only spend the description on the batch-cap warning when it's
+    // actually true — no reason to bring up rounds of 20 for a 3-word day.
+    dueModeDesc.textContent =
+      due.length > PRACTICE_BATCH_SIZE
+        ? `First ${PRACTICE_BATCH_SIZE} of ${due.length} today — more after.`
+        : DUE_MODE_DESCRIPTIONS[Math.floor(Math.random() * DUE_MODE_DESCRIPTIONS.length)](due.length);
   }
+
+  if (active.length === 0) {
+    startAllBtn.disabled = true;
+    freeModeDesc.textContent = "Nothing saved yet.";
+    freeModeTag.hidden = true;
+  } else {
+    startAllBtn.disabled = false;
+    freeModeDesc.textContent =
+      active.length > PRACTICE_BATCH_SIZE
+        ? `${active.length} saved words, in rounds of ${PRACTICE_BATCH_SIZE}.`
+        : `All ${active.length} saved word${active.length === 1 ? "" : "s"}.`;
+    freeModeTag.hidden = false;
+  }
+
+  // Keep a manual pick if it's still valid (e.g. re-render from an unrelated
+  // storage change while the intro is sitting there); otherwise fall back
+  // to whichever mode actually has something to do.
+  if (selectedMode === "due" && due.length === 0) selectedMode = null;
+  if (selectedMode === "free" && active.length === 0) selectedMode = null;
+  if (selectedMode === null) {
+    selectedMode = due.length > 0 ? "due" : active.length > 0 ? "free" : null;
+  }
+  applySelection();
+}
+
+function applySelection() {
+  const dueSelected = selectedMode === "due";
+  const freeSelected = selectedMode === "free";
+  startDueBtn.classList.toggle("selected", dueSelected);
+  startDueBtn.setAttribute("aria-checked", String(dueSelected));
+  startAllBtn.classList.toggle("selected", freeSelected);
+  startAllBtn.setAttribute("aria-checked", String(freeSelected));
+
+  startModeBtn.disabled = selectedMode === null;
+  startModeBtn.textContent =
+    selectedMode === "due"
+      ? "Start Focused Practice"
+      : selectedMode === "free"
+      ? "Start Free Practice"
+      : "Nothing to practice yet";
+}
+
+function selectMode(mode) {
+  selectedMode = mode;
+  applySelection();
 }
 
 function shuffle(arr) {
@@ -510,10 +640,16 @@ function startQuiz(dueOnly) {
   if (!source.length) return;
   practicePoolSize = source.length;
   const shuffled = shuffle(source);
-  const batch = dueOnly ? shuffled : shuffled.slice(0, PRACTICE_BATCH_SIZE);
+  const batch = shuffled.slice(0, PRACTICE_BATCH_SIZE);
   quizQueue = batch.map((w) => ({ ...w, requeued: false }));
   quizPracticeMode = !dueOnly;
   quizStats = { correct: 0, total: 0 };
+
+  // The card itself carries the mode for the whole session — set once here
+  // rather than per-card, since it can't change until the session restarts.
+  flashCard.classList.toggle("graded", !quizPracticeMode);
+  quizModeBadge.textContent = quizPracticeMode ? "Free Practice" : "Focused Practice";
+  quizModeBadge.className = `mode-badge ${quizPracticeMode ? "practice" : "graded"}`;
 
   quizIntro.hidden = true;
   quizDone.hidden = true;
@@ -527,9 +663,8 @@ function showCard() {
     return;
   }
   const card = quizQueue[0];
-  quizProgress.textContent = quizPracticeMode
-    ? `Practicing · ${quizQueue.length} left`
-    : `${quizQueue.length} left`;
+  // The mode badge already names the mode, so this only needs the count.
+  quizProgress.textContent = `${quizQueue.length} left`;
   quizFinnish.textContent = card.finnish;
   quizEnglish.textContent = card.english;
   quizAnswerBlock.hidden = true;
@@ -547,18 +682,22 @@ function finishQuiz() {
   quizDone.hidden = false;
   const { correct, total } = quizStats;
   const remaining = practicePoolSize - total;
+  practiceMoreBtn.hidden = remaining <= 0;
+  if (remaining > 0) {
+    practiceMoreBtn.textContent = quizPracticeMode
+      ? `Practice another ${Math.min(PRACTICE_BATCH_SIZE, remaining)}`
+      : `Review ${Math.min(PRACTICE_BATCH_SIZE, remaining)} more`;
+  }
   if (quizPracticeMode) {
     quizDoneText.textContent =
       remaining > 0
         ? `Done practicing ${total} of ${practicePoolSize} words.`
         : `Done practicing ${total} word${total === 1 ? "" : "s"}.`;
-    practiceMoreBtn.hidden = remaining <= 0;
-    if (remaining > 0) {
-      practiceMoreBtn.textContent = `Practice another ${Math.min(PRACTICE_BATCH_SIZE, remaining)}`;
-    }
   } else {
-    quizDoneText.textContent = `Session complete — ${correct}/${total} correct.`;
-    practiceMoreBtn.hidden = true;
+    quizDoneText.textContent =
+      remaining > 0
+        ? `${correct}/${total} correct — ${remaining} more due.`
+        : `Session complete — ${correct}/${total} correct.`;
     if (total > 0) updateStreak();
   }
   loadWords(); // refresh due counts / list in the background
@@ -752,8 +891,23 @@ clearBtn.addEventListener("click", () => {
 });
 
 exitQuizBtn.addEventListener("click", exitQuiz);
-startDueBtn.addEventListener("click", () => startQuiz(true));
-startAllBtn.addEventListener("click", () => startQuiz(false));
+startDueBtn.addEventListener("click", () => selectMode("due"));
+startAllBtn.addEventListener("click", () => selectMode("free"));
+startModeBtn.addEventListener("click", () => {
+  if (selectedMode) startQuiz(selectedMode === "due");
+});
+
+// role="radio" on two real <button>s implies the native radiogroup
+// interaction — arrow keys move the selection, not just Tab+Enter. With
+// only two options, any arrow key means "the other one".
+document.querySelector(".mode-grid").addEventListener("keydown", (e) => {
+  if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return;
+  const other = document.activeElement === startDueBtn ? startAllBtn : startDueBtn;
+  if (other.disabled) return;
+  e.preventDefault();
+  selectMode(other === startDueBtn ? "due" : "free");
+  other.focus();
+});
 showAnswerBtn.addEventListener("click", () => {
   quizAnswerBlock.hidden = false;
   quizRevealRow.hidden = true;
@@ -767,7 +921,10 @@ quizAgainBtn.addEventListener("click", () => {
   renderPracticeIntro();
 });
 
-practiceMoreBtn.addEventListener("click", () => startQuiz(false));
+// Continue in whatever mode the session was actually in — a due-review
+// session that gets batched should stay graded across batches, not drop
+// into ungraded free practice for its later batches.
+practiceMoreBtn.addEventListener("click", () => startQuiz(!quizPracticeMode));
 
 // ---------- Init ----------
 

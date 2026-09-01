@@ -120,21 +120,6 @@ header h1 {
   color: white;
 }
 
-/* Quiet non-numeric hint that something's ready to review — deliberately
-   not a count, so it doesn't read as a backlog. */
-.ready-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--streak);
-  margin-left: 2px;
-}
-
-.segment-btn.active .ready-dot {
-  background: white;
-}
-
 .subseg-btn {
   display: flex;
   align-items: center;
@@ -381,6 +366,44 @@ header h1 {
   background: var(--row-hover);
 }
 
+/* Custom tooltip — the native `title` attribute it replaces renders at
+   whatever tiny size the OS picks and can't be restyled, which is exactly
+   what made the Stage explanation hard to read. It's also positioned fixed
+   to the viewport (not the trigger) rather than absolute, because its
+   triggers live inside `.list-view`'s `overflow: hidden` (used to clip that
+   table to its rounded corners) — an absolutely-positioned bubble would get
+   cut off against the table's own edges. */
+.info-tip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  cursor: help;
+}
+
+.info-tip-bubble {
+  display: none;
+  position: fixed;
+  width: max-content;
+  max-width: 230px;
+  background: var(--text-primary);
+  color: var(--page);
+  font-size: 12.5px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: 1.5;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.info-tip-bubble.visible {
+  display: block;
+}
+
 .box-badge {
   display: inline-flex;
   align-items: center;
@@ -539,12 +562,135 @@ header h1 {
 .due-text {
   font-size: 15px;
   color: var(--text-secondary);
-  margin: 0 0 16px;
+  margin: 0 0 20px;
 }
 
-.quiz-intro-actions {
+/* A plain div doesn't center its own children just because an ancestor
+   sets `text-align: center` — that only centers inline-level content, and
+   `.primary-btn` (display: flex) is a block-level box, so the Start button
+   was landing flush left no matter what the ancestor's text-align said.
+   Making this a centering flex column — the same pattern `.quiz-card` and
+   `.quiz-view` already use — centers every child regardless of its own
+   display type. */
+.quiz-intro {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Practice-intro mode cards. Focused Practice and Free Practice aren't two
+   sizes of the same action — one updates each word's stage, the other
+   doesn't touch it — so they're laid out as two named, tagged modes you
+   pick between, not a primary/ghost button pair that only differs in fill. */
+.mode-grid {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.mode-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 10px;
+  text-align: left;
+  border-radius: 14px;
+  padding: 20px 18px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+}
+
+/* Selecting a card (radio-style — pick one, then press Start below) is what
+   earns the filled accent treatment now; an unselected card stays neutral
+   even if it's the recommended one, so the fill actually means "chosen"
+   instead of borrowing `.segment-btn.active`'s "currently active" look for
+   a card nobody's picked yet. */
+.mode-card.mode-primary,
+.mode-card.mode-secondary {
+  background: var(--surface);
+  border: 1.5px solid var(--gridline);
+}
+
+.mode-card.mode-primary:hover:not(:disabled):not(.selected),
+.mode-card.mode-secondary:hover:not(:disabled):not(.selected) {
+  border-color: var(--text-muted);
+  background: var(--row-hover);
+}
+
+.mode-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.mode-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mode-card:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.start-mode-btn {
+  margin-top: 20px;
+}
+
+.mode-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+
+.mode-primary .mode-icon {
+  background: var(--accent);
+  color: white;
+}
+
+.mode-secondary .mode-icon {
+  background: var(--row-hover);
+  color: var(--text-secondary);
+}
+
+.mode-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.mode-desc {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.mode-tag {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+
+.mode-primary .mode-tag {
+  background: var(--accent);
+  color: white;
+}
+
+.mode-secondary .mode-tag {
+  background: var(--row-hover);
+  color: var(--text-secondary);
 }
 
 .primary-btn {
@@ -595,6 +741,34 @@ header h1 {
   margin-bottom: 16px;
 }
 
+.quiz-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The card itself carries the mode, not just the header text — grading
+   silently does or doesn't touch a word's stage, so the session needs a
+   visual that survives a glance mid-card, not just at the intro screen. */
+.mode-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 7px;
+  border-radius: 5px;
+}
+
+.mode-badge.graded {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.mode-badge.practice {
+  background: var(--row-hover);
+  color: var(--text-secondary);
+}
+
 .quiz-progress {
   font-size: 12px;
   color: var(--text-muted);
@@ -614,6 +788,12 @@ header h1 {
   margin-bottom: 20px;
   background: var(--page);
   transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.flash-card.graded {
+  border-top-width: 3px;
+  border-top-color: var(--accent);
+  padding-top: 26px;
 }
 
 .flash-card.card-exit {

@@ -21,16 +21,30 @@
     <section id="practiceSection" class="section">
       <div class="quiz-view">
         <div id="quizIntro" class="quiz-intro">
-          <p id="dueText" class="due-text">Checking your words…</p>
-          <div class="quiz-intro-actions">
-            <button id="startDueBtn" class="primary-btn"></button>
-            <button id="startAllBtn" class="ghost-btn">Practice all words</button>
+          <p id="dueText" class="due-text">Choose a mode to practice.</p>
+          <div class="mode-grid" role="radiogroup" aria-label="Practice mode">
+            <button id="startDueBtn" type="button" class="mode-card mode-primary" role="radio" aria-checked="false">
+              <span class="mode-icon"></span>
+              <span class="mode-title">Focused Practice</span>
+              <span id="dueModeDesc" class="mode-desc"></span>
+              <span id="dueModeTag" class="mode-tag">Moves you up a stage</span>
+            </button>
+            <button id="startAllBtn" type="button" class="mode-card mode-secondary" role="radio" aria-checked="false">
+              <span class="mode-icon"></span>
+              <span class="mode-title">Free Practice</span>
+              <span id="freeModeDesc" class="mode-desc"></span>
+              <span id="freeModeTag" class="mode-tag">No stage change</span>
+            </button>
           </div>
+          <button id="startModeBtn" type="button" class="primary-btn start-mode-btn"></button>
         </div>
 
         <div id="quizCard" class="quiz-card" hidden>
           <div class="quiz-card-header">
-            <p id="quizProgress" class="quiz-progress"></p>
+            <div class="quiz-header-left">
+              <span id="quizModeBadge" class="mode-badge"></span>
+              <p id="quizProgress" class="quiz-progress"></p>
+            </div>
             <button id="exitQuizBtn" class="icon-btn small" aria-label="Exit practice"></button>
           </div>
           <div class="flash-card" id="flashCard">
@@ -102,7 +116,15 @@
             <th>Finnish</th>
             <th>English</th>
             <th>Seen</th>
-            <th title="How well you know each word, from Stage 1 (just started) to Stage 5 (almost known). Get a word right and it moves up a stage with a longer gap before it comes back; get it wrong and it resets to Stage 1.">Stage ⓘ</th>
+            <th>
+              <span
+                id="stageInfoTip"
+                class="info-tip"
+                tabindex="0"
+                data-tip="How well you know each word, from Stage 1 (just started) to Stage 5 (almost known). Get a word right and it moves up a stage, so you won't be asked about it again for even longer; get it wrong and it drops back to Stage 1."
+                >Stage ⓘ</span
+              >
+            </th>
             <th>Last seen</th>
             <th></th>
           </tr>
