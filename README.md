@@ -5,6 +5,8 @@ on any webpage. If it's English, you'll see it in Finnish; if it's Finnish,
 you'll see it in English — detected automatically, no language picker needed.
 Click the speaker icon to hear the Finnish word spoken aloud.
 
+**[Landing page & screenshots](https://sanoja-app.github.io/sanoja-finnish-word-reader/)**
+
 ## How to install (unpacked, for testing)
 
 1. Get the code onto your computer, permanently — Chrome loads the extension
