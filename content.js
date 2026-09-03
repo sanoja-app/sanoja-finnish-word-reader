@@ -363,7 +363,7 @@
     });
   }
 
-  function saveWord(finnish, english) {
+  function saveWord(finnish, english, context) {
     const key = finnish.trim().toLowerCase();
     if (!key) return;
     chrome.storage.local.get({ sanojaWords: {} }, ({ sanojaWords }) => {
@@ -379,12 +379,59 @@
         // just encountering a word again on a page doesn't reset its schedule.
         box: existing && existing.box ? existing.box : 1,
         nextReview: existing && existing.nextReview ? existing.nextReview : now,
+        // The sentence the word was first captured from — kept from that
+        // first save (like firstSeen) rather than replaced on later re-saves,
+        // since "why did I save this" is about the original moment, not
+        // whichever page happened to trigger the most recent lookup.
+        context: existing && existing.context ? existing.context : context || "",
       };
       chrome.storage.local.set({ sanojaWords });
     });
   }
 
-  async function handleSelectionText(text, rect) {
+  // Longest a stored sentence gets to be — capped so a selection inside a
+  // giant unbroken block (a whole <article>, a wall-of-text <div>) doesn't
+  // turn "context" into "the entire page".
+  const MAX_CONTEXT_CHARS = 240;
+
+  // Finds the sentence the current selection sits inside, by walking up to
+  // a block-level ancestor and splitting its text on sentence punctuation.
+  // Falls back to the block's own text (capped) when no sentence boundary
+  // contains the selection, which is common in short UI strings — button
+  // labels, nav items, list bullets — that were never full sentences.
+  function getSelectionContext(selection) {
+    if (!selection || selection.rangeCount === 0) return "";
+    const range = selection.getRangeAt(0);
+    let container = range.commonAncestorContainer;
+    if (container.nodeType === Node.TEXT_NODE) container = container.parentElement;
+    if (!container || !container.closest) return "";
+
+    let el = container;
+    for (let i = 0; i < 4 && el.parentElement; i++) {
+      const display = window.getComputedStyle(el).display;
+      if (display !== "inline" && display !== "inline-block") break;
+      el = el.parentElement;
+    }
+
+    const blockText = (el.innerText || el.textContent || "").replace(/\s+/g, " ").trim();
+    if (!blockText) return "";
+
+    const selectedText = selection.toString().trim().toLowerCase();
+    const sentences = blockText.match(/[^.!?]+[.!?]*/g) || [blockText];
+    const match = sentences.find((s) => s.toLowerCase().includes(selectedText));
+    let context = (match || blockText).trim();
+
+    // A "sentence" that's really just the selected word itself (no
+    // surrounding text found) isn't context worth storing.
+    if (context.length <= selectedText.length + 2) return "";
+
+    if (context.length > MAX_CONTEXT_CHARS) {
+      context = `${context.slice(0, MAX_CONTEXT_CHARS - 1).trim()}…`;
+    }
+    return context;
+  }
+
+  async function handleSelectionText(text, rect, context) {
     if (!text || text.length > MAX_CHARS) return;
     if (text === lastText && popupEl) return; // already showing this one
     lastText = text;
@@ -424,7 +471,7 @@
       // Also validate the cleaned versions to ensure the translation didn't
       // introduce unwanted content.
       if (!untranslated && isSingleWord(text) && isSingleWord(finnishText) && isSingleWord(englishText)) {
-        saveWord(finnishText, englishText);
+        saveWord(finnishText, englishText, context);
         maybeShowSaveHint(popupEl);
       }
 
@@ -481,7 +528,7 @@
         height: 0,
       };
     }
-    return { text, rect };
+    return { text, rect, context: getSelectionContext(selection) };
   }
 
   document.addEventListener("mouseup", (e) => {
@@ -493,7 +540,7 @@
     // Let the browser finish updating the selection first.
     setTimeout(() => {
       const sel = getSelectionRectAndText(fallbackPoint);
-      if (sel) handleSelectionText(sel.text, sel.rect);
+      if (sel) handleSelectionText(sel.text, sel.rect, sel.context);
     }, 0);
   });
 
@@ -504,7 +551,7 @@
     const fallbackPoint = { x: e.clientX, y: e.clientY };
     setTimeout(() => {
       const sel = getSelectionRectAndText(fallbackPoint);
-      if (sel) handleSelectionText(sel.text, sel.rect);
+      if (sel) handleSelectionText(sel.text, sel.rect, sel.context);
     }, 0);
   });
 

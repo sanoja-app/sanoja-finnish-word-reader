@@ -55,23 +55,32 @@ const dueModeDesc = document.getElementById("dueModeDesc");
 const dueModeTag = document.getElementById("dueModeTag");
 const freeModeDesc = document.getElementById("freeModeDesc");
 const freeModeTag = document.getElementById("freeModeTag");
+const batchSizeSlider = document.getElementById("batchSizeSlider");
+const batchSizeValue = document.getElementById("batchSizeValue");
+batchSizeValue.textContent = batchSizeSlider.value;
 const startModeBtn = document.getElementById("startModeBtn");
 const quizCard = document.getElementById("quizCard");
 const exitQuizBtn = document.getElementById("exitQuizBtn");
 const flashCard = document.getElementById("flashCard");
 const quizProgress = document.getElementById("quizProgress");
+const quizProgressFill = document.getElementById("quizProgressFill");
 const quizModeBadge = document.getElementById("quizModeBadge");
 const quizFinnish = document.getElementById("quizFinnish");
 const quizSpeakBtn = document.getElementById("quizSpeakBtn");
 const quizAnswerBlock = document.getElementById("quizAnswerBlock");
 const quizEnglish = document.getElementById("quizEnglish");
+const quizContext = document.getElementById("quizContext");
 const quizRevealRow = document.getElementById("quizRevealRow");
 const showAnswerBtn = document.getElementById("showAnswerBtn");
 const quizGradeRow = document.getElementById("quizGradeRow");
 const gradeWrongBtn = document.getElementById("gradeWrongBtn");
 const gradeRightBtn = document.getElementById("gradeRightBtn");
+const quizAutoSpeakBtn = document.getElementById("quizAutoSpeakBtn");
 const quizDone = document.getElementById("quizDone");
+const quizDoneIcon = document.getElementById("quizDoneIcon");
+const quizDoneHeadline = document.getElementById("quizDoneHeadline");
 const quizDoneText = document.getElementById("quizDoneText");
+const quizDoneStreak = document.getElementById("quizDoneStreak");
 const quizAgainBtn = document.getElementById("quizAgainBtn");
 const practiceMoreBtn = document.getElementById("practiceMoreBtn");
 
@@ -101,8 +110,24 @@ let selectedMode = null;
 // deliberately avoids showing as a raw count. Capping a single session and
 // letting you start another batch keeps that same spirit instead of dumping
 // everything in one sitting.
-const PRACTICE_BATCH_SIZE = 20;
+// A slider (5-30 words) lets each user pick their own ceiling instead of
+// this being fixed — someone with five minutes wants a short round, someone
+// with more time wants a bigger one. Kept mutable and persisted per-device.
+let PRACTICE_BATCH_SIZE = 20;
 let practicePoolSize = 0;
+
+// Separate from the popup's general "Speak automatically" setting (which
+// only covers casual on-page lookups) — this one governs the quiz's own
+// deliberate per-card speech, so it needs its own toggle and its own key.
+let quizAutoSpeak = true;
+function renderQuizAutoSpeakBtn() {
+  quizAutoSpeakBtn.innerHTML = iconSvg(quizAutoSpeak ? "volume" : "volumeOff", 15);
+  quizAutoSpeakBtn.classList.toggle("muted", !quizAutoSpeak);
+  quizAutoSpeakBtn.setAttribute(
+    "aria-label",
+    quizAutoSpeak ? "Turn off automatic pronunciation" : "Turn on automatic pronunciation"
+  );
+}
 
 // ---------- Tooltips ----------
 
@@ -172,6 +197,7 @@ function populateIcons() {
   cleanupBtn.innerHTML = `${iconSvg("trash", 15)}Clean up sentences`;
   clearBtn.innerHTML = `${iconSvg("trash", 15)}Clear all`;
   quizSpeakBtn.innerHTML = iconSvg("volume", 16);
+  renderQuizAutoSpeakBtn();
   exitQuizBtn.innerHTML = iconSvg("x", 14);
   gradeWrongBtn.innerHTML = `${iconSvg("x", 14)}Didn't know it`;
   gradeRightBtn.innerHTML = `${iconSvg("check", 14)}Knew it`;
@@ -216,6 +242,8 @@ function getFiltered() {
     list.sort((a, b) => b.count - a.count);
   } else if (sortBy === "az") {
     list.sort((a, b) => a.finnish.localeCompare(b.finnish));
+  } else if (sortBy === "stage") {
+    list.sort((a, b) => (a.box || 1) - (b.box || 1));
   } else {
     list.sort((a, b) => new Date(b.lastSeen) - new Date(a.lastSeen));
   }
@@ -376,6 +404,13 @@ function renderList(words) {
     const tdFi = document.createElement("td");
     tdFi.className = "finnish";
     tdFi.textContent = w.finnish;
+    if (w.context) {
+      const ctxTip = document.createElement("span");
+      ctxTip.className = "context-tip";
+      ctxTip.textContent = " ⓘ";
+      initTooltip(ctxTip, w.context);
+      tdFi.appendChild(ctxTip);
+    }
 
     const tdEn = document.createElement("td");
     tdEn.textContent = w.english;
@@ -505,9 +540,9 @@ function cleanupSentences() {
 }
 
 function exportCsv() {
-  const rows = [["finnish", "english", "count", "first_seen", "last_seen", "box", "next_review"]];
+  const rows = [["finnish", "english", "count", "first_seen", "last_seen", "box", "next_review", "context"]];
   getFiltered().forEach((w) => {
-    rows.push([w.finnish, w.english, w.count, w.firstSeen, w.lastSeen, w.box, w.nextReview]);
+    rows.push([w.finnish, w.english, w.count, w.firstSeen, w.lastSeen, w.box, w.nextReview, w.context || ""]);
   });
   const csv = rows
     .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
@@ -577,11 +612,12 @@ function renderPracticeIntro() {
   } else {
     startDueBtn.disabled = false;
     dueModeTag.hidden = false;
-    // Only spend the description on the batch-cap warning when it's
-    // actually true — no reason to bring up rounds of 20 for a 3-word day.
+    // Past the batch cap, describe the round about to start (your weakest
+    // N), not the full day's total — the leftovers are the next screen's
+    // "Practice another 20" to mention, not this one's.
     dueModeDesc.textContent =
       due.length > PRACTICE_BATCH_SIZE
-        ? `First ${PRACTICE_BATCH_SIZE} of ${due.length} today — more after.`
+        ? `Your ${PRACTICE_BATCH_SIZE} weakest words right now.`
         : DUE_MODE_DESCRIPTIONS[Math.floor(Math.random() * DUE_MODE_DESCRIPTIONS.length)](due.length);
   }
 
@@ -593,7 +629,7 @@ function renderPracticeIntro() {
     startAllBtn.disabled = false;
     freeModeDesc.textContent =
       active.length > PRACTICE_BATCH_SIZE
-        ? `${active.length} saved words, in rounds of ${PRACTICE_BATCH_SIZE}.`
+        ? `${PRACTICE_BATCH_SIZE} random words from everything you've saved.`
         : `All ${active.length} saved word${active.length === 1 ? "" : "s"}.`;
     freeModeTag.hidden = false;
   }
@@ -663,18 +699,40 @@ function showCard() {
     return;
   }
   const card = quizQueue[0];
+  // Enter plays in reverse of the exit transition that just carried the
+  // previous card away — added before the new content lands, then dropped
+  // a frame later once the browser has painted that starting state, so
+  // removing it is what triggers the transition to rest.
+  flashCard.classList.add("card-enter");
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => flashCard.classList.remove("card-enter"));
+  });
   // The mode badge already names the mode, so this only needs the count.
   quizProgress.textContent = `${quizQueue.length} left`;
+  // A requeued miss grows the denominator along with the numerator, so the
+  // bar doesn't leap backward when a missed card gets a second lap.
+  const roundTotal = quizStats.total + quizQueue.length;
+  quizProgressFill.style.transform = `scaleX(${roundTotal > 0 ? quizStats.total / roundTotal : 0})`;
   quizFinnish.textContent = card.finnish;
   quizEnglish.textContent = card.english;
+  // Shown alongside the Finnish word, not just on reveal — the sentence
+  // is in Finnish too, so seeing it doesn't give away the English answer,
+  // and it's what makes the word "meaning-in-use" rather than a bare pair.
+  if (card.context) {
+    quizContext.textContent = `“${card.context}”`;
+    quizContext.hidden = false;
+  } else {
+    quizContext.hidden = true;
+  }
   quizAnswerBlock.hidden = true;
   quizRevealRow.hidden = false;
   quizGradeRow.hidden = true;
 
-  // The quiz is a deliberate pronunciation-practice moment, so this speaks
-  // every card automatically regardless of the general "Speak automatically"
-  // setting (which only covers casual page lookups).
-  speakFinnish(card.finnish);
+  // The quiz is a deliberate pronunciation-practice moment, so by default
+  // this speaks every card regardless of the general "Speak automatically"
+  // setting (which only covers casual page lookups) — unless muted via its
+  // own toggle, in which case the manual speak button still works.
+  if (quizAutoSpeak) speakFinnish(card.finnish);
 }
 
 function finishQuiz() {
@@ -688,17 +746,31 @@ function finishQuiz() {
       ? `Practice another ${Math.min(PRACTICE_BATCH_SIZE, remaining)}`
       : `Review ${Math.min(PRACTICE_BATCH_SIZE, remaining)} more`;
   }
+  quizDoneStreak.hidden = true;
   if (quizPracticeMode) {
+    // Ungraded, so there's no score to celebrate — the accomplishment here
+    // is just showing up, which "Nice work" says without inventing a metric.
+    quizDoneIcon.className = "quiz-done-icon";
+    quizDoneIcon.innerHTML = iconSvg("shuffle", 22);
+    quizDoneHeadline.textContent = "Nice work!";
     quizDoneText.textContent =
       remaining > 0
         ? `Done practicing ${total} of ${practicePoolSize} words.`
         : `Done practicing ${total} word${total === 1 ? "" : "s"}.`;
   } else {
+    quizDoneIcon.className = "quiz-done-icon good";
+    quizDoneIcon.innerHTML = iconSvg("check", 22);
+    quizDoneHeadline.textContent = total > 0 && correct === total ? "Perfect round!" : "Nice work!";
     quizDoneText.textContent =
       remaining > 0
         ? `${correct}/${total} correct — ${remaining} more due.`
         : `Session complete — ${correct}/${total} correct.`;
-    if (total > 0) updateStreak();
+    if (total > 0) {
+      updateStreak((count) => {
+        quizDoneStreak.hidden = false;
+        quizDoneStreak.innerHTML = `${iconSvg("flame", 13)}${count} day streak`;
+      });
+    }
   }
   loadWords(); // refresh due counts / list in the background
 }
@@ -713,7 +785,9 @@ function exitQuiz() {
 
 function gradeCard(known) {
   const card = quizQueue[0];
-  flashCard.classList.add("card-exit");
+  // The color wash names the grade just given, on the card itself; the
+  // exit motion carries it away a beat later so the wash has time to read.
+  flashCard.classList.add("card-exit", known ? "grade-good" : "grade-bad");
 
   setTimeout(() => {
     quizQueue.shift();
@@ -730,8 +804,8 @@ function gradeCard(known) {
       quizQueue.push(card);
     }
 
+    flashCard.classList.remove("card-exit", "grade-good", "grade-bad");
     showCard();
-    flashCard.classList.remove("card-exit");
   }, 150);
 }
 
@@ -768,18 +842,19 @@ function updateSchedule(key, known) {
 
 // A day is only "kept" if you finish at least one real (non-practice-all) due
 // session on it; skip a calendar day entirely and the streak resets to 1.
-function updateStreak() {
+function updateStreak(onDone) {
   chrome.storage.local.get({ sanojaStreak: null }, ({ sanojaStreak }) => {
     const todayStr = new Date().toISOString().slice(0, 10);
     if (sanojaStreak && sanojaStreak.lastPracticeDate === todayStr) {
-      return; // already counted today
+      onDone && onDone(sanojaStreak.count); // already counted today
+      return;
     }
     const yesterdayStr = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const next =
       sanojaStreak && sanojaStreak.lastPracticeDate === yesterdayStr
         ? { count: sanojaStreak.count + 1, lastPracticeDate: todayStr }
         : { count: 1, lastPracticeDate: todayStr };
-    chrome.storage.local.set({ sanojaStreak: next });
+    chrome.storage.local.set({ sanojaStreak: next }, () => onDone && onDone(next.count));
   });
 }
 
@@ -833,6 +908,12 @@ async function speakFinnish(text) {
   const voice = pickFinnishVoice(voices);
   if (voice) utterance.voice = voice;
   utterance.rate = 0.92;
+  // Pulses the speak button for the duration of the utterance — audio is
+  // the one thing on this screen with no visible timeline otherwise,
+  // whether it fired from a click or the automatic per-card speech.
+  quizSpeakBtn.classList.add("speaking");
+  utterance.onend = () => quizSpeakBtn.classList.remove("speaking");
+  utterance.onerror = () => quizSpeakBtn.classList.remove("speaking");
   window.speechSynthesis.speak(utterance);
 }
 
@@ -916,6 +997,11 @@ showAnswerBtn.addEventListener("click", () => {
 gradeWrongBtn.addEventListener("click", () => gradeCard(false));
 gradeRightBtn.addEventListener("click", () => gradeCard(true));
 quizSpeakBtn.addEventListener("click", () => speakFinnish(quizFinnish.textContent));
+quizAutoSpeakBtn.addEventListener("click", () => {
+  quizAutoSpeak = !quizAutoSpeak;
+  chrome.storage.local.set({ sanojaQuizAutoSpeak: quizAutoSpeak });
+  renderQuizAutoSpeakBtn();
+});
 quizAgainBtn.addEventListener("click", () => {
   quizDone.hidden = true;
   renderPracticeIntro();
@@ -935,4 +1021,25 @@ chrome.storage.local.get({ sanojaWords: {} }, ({ sanojaWords }) => {
   ).length;
   setSegment(dueCount > 0 ? "practice" : "words");
   loadWords();
+});
+
+chrome.storage.local.get({ sanojaQuizAutoSpeak: true }, ({ sanojaQuizAutoSpeak }) => {
+  quizAutoSpeak = sanojaQuizAutoSpeak;
+  renderQuizAutoSpeakBtn();
+});
+
+chrome.storage.local.get({ sanojaBatchSize: 20 }, ({ sanojaBatchSize }) => {
+  PRACTICE_BATCH_SIZE = sanojaBatchSize;
+  batchSizeSlider.value = String(PRACTICE_BATCH_SIZE);
+  batchSizeValue.textContent = String(PRACTICE_BATCH_SIZE);
+  renderPracticeIntro(); // descriptions above ("First 20 of…") depend on the batch size
+});
+
+batchSizeSlider.addEventListener("input", () => {
+  batchSizeValue.textContent = batchSizeSlider.value;
+});
+batchSizeSlider.addEventListener("change", () => {
+  PRACTICE_BATCH_SIZE = Number(batchSizeSlider.value);
+  chrome.storage.local.set({ sanojaBatchSize: PRACTICE_BATCH_SIZE });
+  renderPracticeIntro();
 });

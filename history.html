@@ -27,14 +27,20 @@
               <span class="mode-icon"></span>
               <span class="mode-title">Focused Practice</span>
               <span id="dueModeDesc" class="mode-desc"></span>
-              <span id="dueModeTag" class="mode-tag">Moves you up a stage</span>
+              <span id="dueModeTag" class="mode-tag">Counts toward your learning stage</span>
             </button>
             <button id="startAllBtn" type="button" class="mode-card mode-secondary" role="radio" aria-checked="false">
               <span class="mode-icon"></span>
               <span class="mode-title">Free Practice</span>
               <span id="freeModeDesc" class="mode-desc"></span>
-              <span id="freeModeTag" class="mode-tag">No stage change</span>
+              <span id="freeModeTag" class="mode-tag">Doesn't affect your learning stage</span>
             </button>
+          </div>
+          <div class="batch-size-row">
+            <label for="batchSizeSlider" class="batch-size-label">
+              Words per round: <span id="batchSizeValue"></span>
+            </label>
+            <input type="range" id="batchSizeSlider" min="5" max="30" step="5" value="20" />
           </div>
           <button id="startModeBtn" type="button" class="primary-btn start-mode-btn"></button>
         </div>
@@ -45,14 +51,19 @@
               <span id="quizModeBadge" class="mode-badge"></span>
               <p id="quizProgress" class="quiz-progress"></p>
             </div>
-            <button id="exitQuizBtn" class="icon-btn small" aria-label="Exit practice"></button>
+            <div class="quiz-header-right">
+              <button id="quizAutoSpeakBtn" class="icon-btn small" aria-label="Turn off automatic pronunciation"></button>
+              <button id="exitQuizBtn" class="icon-btn small" aria-label="Exit practice"></button>
+            </div>
           </div>
+          <div class="quiz-progress-track"><div id="quizProgressFill" class="quiz-progress-fill"></div></div>
           <div class="flash-card" id="flashCard">
             <div class="flash-label">Finnish</div>
             <div class="flash-word-row">
               <div id="quizFinnish" class="flash-finnish"></div>
               <button id="quizSpeakBtn" class="speak-btn" aria-label="Hear pronunciation"></button>
             </div>
+            <p id="quizContext" class="flash-context" hidden></p>
             <div id="quizAnswerBlock" class="flash-answer-block" hidden>
               <div class="flash-label">English</div>
               <div id="quizEnglish" class="flash-english"></div>
@@ -69,7 +80,10 @@
         </div>
 
         <div id="quizDone" class="quiz-done" hidden>
+          <div id="quizDoneIcon" class="quiz-done-icon"></div>
+          <h2 id="quizDoneHeadline" class="quiz-done-headline"></h2>
           <p id="quizDoneText"></p>
+          <span id="quizDoneStreak" class="quiz-done-streak" hidden></span>
           <button id="practiceMoreBtn" class="primary-btn" hidden></button>
           <button id="quizAgainBtn" class="ghost-btn">Back</button>
         </div>
@@ -88,6 +102,7 @@
           <option value="lastSeen">Recently seen</option>
           <option value="count">Most frequent</option>
           <option value="az">A → Z</option>
+          <option value="stage">Stage (weakest first)</option>
         </select>
 
         <div class="segmented small" id="subSegmented">

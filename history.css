@@ -21,6 +21,8 @@
   --good: #1baf7a;
   --streak: #eb6834;
   --row-hover: #f2f2f7;
+  --card-surface: #ffffff;
+  --shadow-card: 0 1px 3px rgba(11, 11, 11, 0.05), 0 10px 24px rgba(11, 11, 11, 0.06);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -39,6 +41,8 @@
     --good: #199e70;
     --streak: #d95926;
     --row-hover: #232322;
+    --card-surface: #211f1c;
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 12px 28px rgba(0, 0, 0, 0.35);
   }
 }
 
@@ -380,6 +384,11 @@ header h1 {
   cursor: help;
 }
 
+.context-tip {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
 .info-tip-bubble {
   display: none;
   position: fixed;
@@ -637,6 +646,30 @@ header h1 {
   cursor: default;
 }
 
+.batch-size-row {
+  width: 100%;
+  max-width: 460px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.batch-size-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.batch-size-label span {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.batch-size-row input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
 .start-mode-btn {
   margin-top: 20px;
 }
@@ -747,6 +780,35 @@ header h1 {
   gap: 8px;
 }
 
+.quiz-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-btn.small.muted {
+  color: var(--text-muted);
+}
+
+.quiz-progress-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--gridline);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.quiz-progress-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
 /* The card itself carries the mode, not just the header text — grading
    silently does or doesn't touch a word's stage, so the session needs a
    visual that survives a glance mid-card, not just at the intro screen. */
@@ -786,8 +848,10 @@ header h1 {
   border-radius: 12px;
   padding: 28px 24px;
   margin-bottom: 20px;
-  background: var(--page);
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  background: var(--card-surface);
+  box-shadow: var(--shadow-card);
+  transition: opacity 0.2s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.2s cubic-bezier(0.22, 0.61, 0.36, 1), border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .flash-card.graded {
@@ -796,9 +860,30 @@ header h1 {
   padding-top: 26px;
 }
 
+/* Exit plays on the outgoing card; enter is the same motion in reverse on
+   the incoming one, so a card advance reads as one continuous swap instead
+   of a fade-out followed by a hard pop-in. */
 .flash-card.card-exit {
   opacity: 0;
-  transform: translateY(-6px) scale(0.98);
+  transform: translateY(-8px) scale(0.98);
+}
+
+.flash-card.card-enter {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+}
+
+/* A brief color wash on the card itself — echoing the grade button just
+   pressed — before the exit transition carries it away, so the grade
+   registers on the card, not just the button under the cursor. */
+.flash-card.grade-good {
+  border-color: var(--good);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 16%, transparent), var(--shadow-card);
+}
+
+.flash-card.grade-bad {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 16%, transparent), var(--shadow-card);
 }
 
 .flash-label {
@@ -835,12 +920,61 @@ header h1 {
   border-radius: 50%;
   cursor: pointer;
   flex-shrink: 0;
+  transition: transform 0.1s ease;
+}
+
+.speak-btn:active {
+  transform: scale(0.92);
+}
+
+/* A ring that expands and fades while the utterance plays, so the one
+   piece of this screen with no visible duration (audio) gets a visible
+   one — mirrors the source, not decoration bolted onto an idle button. */
+.speak-btn.speaking {
+  animation: speakPulse 1s ease-out infinite;
+}
+
+@keyframes speakPulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 9px color-mix(in srgb, var(--accent) 0%, transparent);
+  }
+}
+
+.flash-context {
+  margin: 10px auto 0;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-secondary);
+  max-width: 34ch;
 }
 
 .flash-answer-block {
   margin-top: 18px;
   padding-top: 18px;
   border-top: 1px dashed var(--gridline);
+  transform-origin: top center;
+  animation: flashReveal 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Same motion drives the reveal/grade button row each card, so the whole
+   sequence — card in, card tilts open, controls settle — reads as one
+   authored beat instead of the card animating alone. */
+.quiz-actions {
+  animation: flashReveal 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@keyframes flashReveal {
+  from {
+    opacity: 0;
+    transform: perspective(600px) rotateX(-8deg) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(600px) rotateX(0) translateY(0);
+  }
 }
 
 .flash-english {
@@ -865,6 +999,7 @@ header h1 {
   font-weight: 600;
   cursor: pointer;
   color: white;
+  transition: transform 0.1s ease, filter 0.1s ease;
 }
 
 .grade-btn.wrong {
@@ -879,8 +1014,45 @@ header h1 {
   filter: brightness(1.1);
 }
 
+.grade-btn:active {
+  transform: scale(0.97);
+}
+
+.quiz-done-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.quiz-done-icon.good {
+  background: color-mix(in srgb, var(--good) 12%, transparent);
+  color: var(--good);
+}
+
+.quiz-done-headline {
+  font-size: 19px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
 .quiz-done p {
   font-size: 15px;
   color: var(--text-secondary);
   margin: 0 0 16px;
+}
+
+.quiz-done-streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--streak);
+  font-weight: 600;
+  font-size: 13px;
+  margin: -8px 0 16px;
 }
