@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Sanoja - Finnish Translator & Dictionary",
-  "version": "2.1.13",
+  "version": "2.1.14",
   "description": "Finnish translator & dictionary: select any word on the web to translate English ↔ Finnish, hear it, and review with flashcards.",
   "permissions": ["storage"],
   "host_permissions": [
