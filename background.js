@@ -10,6 +10,8 @@
 // The service worker doesn't have that restriction, so it does the actual
 // network request here, and the content script just asks it for a result.
 
+chrome.runtime.setUninstallURL("https://sanoja-app.github.io/sanoja-finnish-word-reader/uninstall.html");
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!message || message.type !== "sanoja-translate") return false;
 
